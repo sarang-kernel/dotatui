@@ -110,7 +110,7 @@ async fn run_app(
 async fn handle_action(
     action: &Action,
     app: &mut App,
-    config: &mut Config,
+    _config: &mut Config,
     dotfiles_path: &PathBuf,
 ) -> Result<()> {
     app.update(action)?;

@@ -42,7 +42,7 @@ pub struct Config {
 fn get_config_path() -> Result<PathBuf> {
     // Use a reverse domain name notation for uniqueness.
     let proj_dirs =
-        ProjectDirs::from("com", "YourName", "DotaTUI").ok_or(Error::NoHomeDir)?;
+        ProjectDirs::from("com", "SarangVehale", "DotaTUI").ok_or(Error::NoHomeDir)?;
     let config_dir = proj_dirs.config_dir();
     // Ensure the config directory exists before trying to write to it.
     fs::create_dir_all(config_dir)?;

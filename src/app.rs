@@ -17,53 +17,70 @@ use crate::git_utils::StatusItem;
 use ratatui::widgets::ListState;
 use tokio::sync::mpsc;
 
-/// Defines the different modes the application can be in, including a dedicated setup prompt.
+/// Enum to track which UI panel is currently focused.
+#[derive(Debug, PartialEq, Eq)]
+pub enum FocusedPanel {
+    Unstaged,
+    Staged,
+    Menu,
+}
+
+/// Enum for the different kinds of popups that can be active.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PopupMode {
+    Commit,
+    AddRemote,
+    Help,
+    InitRepo,
+}
+
+/// Simplified AppMode for a more direct interaction model.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AppMode {
     Normal,
-    Search,
-    CommitInput,
-    Help,
-    AddRemote,
-    /// A new mode for when the app starts in a directory with no .git folder.
-    InitRepoPrompt,
+    Popup(PopupMode),
 }
 
-/// Represents all possible actions, now including one for initializing the repository.
+/// Actions are updated to reflect the new panel-based UI.
 #[derive(Debug)]
 pub enum Action {
     Tick,
     Render,
     Quit,
     ToggleHelp,
-    EnterSearch,
-    EnterCommit,
-    EnterAddRemote,
-    EnterNormal,
+    EnterPopup(PopupMode),
+    ExitPopup,
     RefreshStatus,
-    StatusUpdated(Result<Vec<StatusItem>>),
-    AddAll,
+    StatusUpdated(Result<(Vec<StatusItem>, Vec<StatusItem>)>),
+    StageFile,
+    UnstageFile,
+    StageAll,
+    UnstageAll,
     Commit,
     Push,
     PushCompleted(Result<()>),
-    /// A new action to trigger repository initialization.
     InitRepo,
     AddRemote,
+    FocusNextPanel,
+    FocusPrevPanel,
     NavigateUp,
     NavigateDown,
-    NavigateTop,
-    NavigateBottom,
+    ExecuteCommand,
     Input(char),
     InputDelete,
 }
 
-/// The main application state.
+/// The main application state, restructured for a panel-based UI.
 pub struct App {
     pub mode: AppMode,
+    pub focused_panel: FocusedPanel,
+    pub unstaged_changes: Vec<StatusItem>,
+    pub staged_changes: Vec<StatusItem>,
+    pub unstaged_state: ListState,
+    pub staged_state: ListState,
+    pub menu_items: Vec<String>,
+    pub menu_state: ListState,
     pub should_quit: bool,
-    pub status_items: Vec<StatusItem>,
-    pub filtered_items: Vec<usize>,
-    pub list_state: ListState,
     pub input: String,
     pub message: String,
     pub is_loading: bool,
@@ -71,140 +88,159 @@ pub struct App {
 }
 
 impl App {
-    /// Creates a new `App` instance.
     pub fn new(action_tx: mpsc::UnboundedSender<Action>) -> Self {
         let mut app = App {
-            // The initial mode is set to Normal here, but will be immediately
-            // overridden in `main.rs` if a setup is required.
             mode: AppMode::Normal,
+            focused_panel: FocusedPanel::Unstaged,
+            unstaged_changes: Vec::new(),
+            staged_changes: Vec::new(),
+            unstaged_state: ListState::default(),
+            staged_state: ListState::default(),
+            menu_items: vec![
+                "Commit".to_string(),
+                "Push".to_string(),
+                "Stage All".to_string(),
+                "Unstage All".to_string(),
+                "Refresh".to_string(),
+                "Init Repo".to_string(),
+            ],
+            menu_state: ListState::default(),
             should_quit: false,
-            status_items: Vec::new(),
-            filtered_items: Vec::new(),
-            list_state: ListState::default(),
             input: String::new(),
-            message: "Welcome to DotaTUI! Press 'r' to refresh status or '?' for help.".to_string(),
+            message: "Welcome to DotaTUI! Press 'Tab' to switch panels, '?' for help.".to_string(),
             is_loading: false,
             action_tx,
         };
-        app.list_state.select(Some(0));
+        app.unstaged_state.select(Some(0));
+        app.menu_state.select(Some(0));
         app
     }
 
-    /// The main state update function. It takes an action and modifies the app state accordingly.
+    /// Main state update function.
     pub fn update(&mut self, action: &Action) -> Result<()> {
         match action {
             Action::Quit => self.should_quit = true,
             Action::ToggleHelp => {
-                self.mode = if self.mode != AppMode::Help { AppMode::Help } else { AppMode::Normal };
+                self.mode = if self.mode == AppMode::Popup(PopupMode::Help) {
+                    AppMode::Normal
+                } else {
+                    AppMode::Popup(PopupMode::Help)
+                };
             }
-            Action::EnterSearch => self.mode = AppMode::Search,
-            Action::EnterCommit => self.mode = AppMode::CommitInput,
-            Action::EnterAddRemote => {
-                self.message = "Enter the full SSH or HTTPS URL for the 'origin' remote.".to_string();
-                self.mode = AppMode::AddRemote;
-            }
-            Action::EnterNormal => {
+            Action::EnterPopup(mode) => self.mode = AppMode::Popup(mode.clone()),
+            Action::ExitPopup => {
                 self.input.clear();
-                self.apply_filter();
                 self.mode = AppMode::Normal;
             }
             Action::RefreshStatus => self.is_loading = true,
-            Action::StatusUpdated(Ok(items)) => {
+            Action::StatusUpdated(Ok((unstaged, staged))) => {
                 self.is_loading = false;
-                let old_item_count = self.status_items.len();
-                self.status_items = items.clone();
-                self.apply_filter();
-
-                if self.status_items.is_empty() {
-                    self.message = "Repository is clean. No changes found.".to_string();
-                } else if self.status_items.len() == old_item_count {
-                    self.message = format!("{} uncommitted changes found.", self.status_items.len());
-                } else {
-                    self.message = format!("Status updated. {} changes found.", self.status_items.len());
-                }
+                self.unstaged_changes = unstaged.clone();
+                self.staged_changes = staged.clone();
+                self.check_selection_bounds();
+                self.message = "Status refreshed.".to_string();
             }
             Action::StatusUpdated(Err(e)) => {
                 self.is_loading = false;
-                self.message = format!("Error fetching status: {}", e);
+                self.message = format!("Error: {}", e);
             }
-            Action::Push => {
-                self.is_loading = true;
-                self.message = "Pushing to remote...".to_string();
-            }
-            Action::PushCompleted(Ok(_)) => {
-                self.is_loading = false;
-                self.message = "Push successful.".to_string();
-                self.send_action(Action::RefreshStatus)?;
-            }
-            Action::PushCompleted(Err(e)) => {
-                self.is_loading = false;
-                self.message = format!("Push failed: {}", e);
-            }
-            Action::NavigateUp => self.previous(),
-            Action::NavigateDown => self.next(),
-            Action::NavigateTop => self.go_to_top(),
-            Action::NavigateBottom => self.go_to_bottom(),
+            Action::FocusNextPanel => self.focus_next(),
+            Action::FocusPrevPanel => self.focus_prev(),
+            Action::NavigateUp => self.navigate_up(),
+            Action::NavigateDown => self.navigate_down(),
             Action::Input(c) => self.input.push(*c),
             Action::InputDelete => {
                 self.input.pop();
             }
-            // Actions with side-effects like InitRepo are handled in main.rs
             _ => {}
-        };
-
-        if self.mode == AppMode::Search {
-            self.apply_filter();
         }
-
         Ok(())
     }
 
-    /// A helper function to send an action to the main event loop.
-    pub fn send_action(&self, action: Action) -> Result<()> {
-        self.action_tx.send(action).map_err(|_| crate::error::Error::ChannelSend)
-    }
-
-    /// Updates the `filtered_items` list based on the current search query in `self.input`.
-    fn apply_filter(&mut self) {
-        let query = self.input.to_lowercase();
-        self.filtered_items = self.status_items.iter().enumerate()
-            .filter(|(_, item)| item.path.to_lowercase().contains(&query))
-            .map(|(i, _)| i)
-            .collect();
-        
-        if self.filtered_items.is_empty() {
-            self.list_state.select(None);
-        } else {
-            let new_selection = self.list_state.selected().map_or(0, |i| i.min(self.filtered_items.len() - 1));
-            self.list_state.select(Some(new_selection));
+    /// Ensures list selections are not out of bounds after data changes.
+    fn check_selection_bounds(&mut self) {
+        if self.unstaged_state.selected().is_some() && self.unstaged_state.selected().unwrap() >= self.unstaged_changes.len() {
+            self.unstaged_state.select(self.unstaged_changes.len().checked_sub(1));
+        }
+        if self.staged_state.selected().is_some() && self.staged_state.selected().unwrap() >= self.staged_changes.len() {
+            self.staged_state.select(self.staged_changes.len().checked_sub(1));
         }
     }
 
-    // --- Navigation Methods ---
-
-    pub fn next(&mut self) {
-        if self.filtered_items.is_empty() { return; }
-        let i = match self.list_state.selected() {
-            Some(i) => if i >= self.filtered_items.len() - 1 { 0 } else { i + 1 },
-            None => 0,
-        };
-        self.list_state.select(Some(i));
+    /// Cycles focus to the next panel.
+    fn focus_next(&mut self) {
+        self.focused_panel = match self.focused_panel {
+            FocusedPanel::Unstaged => FocusedPanel::Staged,
+            FocusedPanel::Staged => FocusedPanel::Menu,
+            FocusedPanel::Menu => FocusedPanel::Unstaged,
+        }
     }
 
-    pub fn previous(&mut self) {
-        if self.filtered_items.is_empty() { return; }
-        let i = match self.list_state.selected() {
-            Some(i) => if i == 0 { self.filtered_items.len() - 1 } else { i - 1 },
-            None => 0,
-        };
-        self.list_state.select(Some(i));
-    }
-    
-    pub fn go_to_top(&mut self) {
-        if !self.filtered_items.is_empty() { self.list_state.select(Some(0)); }
+    /// Cycles focus to the previous panel.
+    fn focus_prev(&mut self) {
+        self.focused_panel = match self.focused_panel {
+            FocusedPanel::Unstaged => FocusedPanel::Menu,
+            FocusedPanel::Staged => FocusedPanel::Unstaged,
+            FocusedPanel::Menu => FocusedPanel::Staged,
+        }
     }
 
-    pub fn go_to_bottom(&mut self) {
-        if !self.filtered_items.is_empty() { self.list_state.select(Some(self.filtered_items.len() - 1)); }
+    /// Navigates up in the currently focused list.
+    fn navigate_up(&mut self) {
+        match self.focused_panel {
+            FocusedPanel::Unstaged => previous_item(&mut self.unstaged_state, self.unstaged_changes.len()),
+            FocusedPanel::Staged => previous_item(&mut self.staged_state, self.staged_changes.len()),
+            FocusedPanel::Menu => previous_item(&mut self.menu_state, self.menu_items.len()),
+        }
     }
+
+    /// Navigates down in the currently focused list.
+    fn navigate_down(&mut self) {
+        match self.focused_panel {
+            FocusedPanel::Unstaged => next_item(&mut self.unstaged_state, self.unstaged_changes.len()),
+            FocusedPanel::Staged => next_item(&mut self.staged_state, self.staged_changes.len()),
+            FocusedPanel::Menu => next_item(&mut self.menu_state, self.menu_items.len()),
+        }
+    }
+
+    /// Gets the currently selected item in the unstaged changes panel.
+    pub fn get_selected_unstaged_file(&self) -> Option<&StatusItem> {
+        self.unstaged_state.selected().and_then(|i| self.unstaged_changes.get(i))
+    }
+
+    /// Gets the currently selected item in the staged changes panel.
+    pub fn get_selected_staged_file(&self) -> Option<&StatusItem> {
+        self.staged_state.selected().and_then(|i| self.staged_changes.get(i))
+    }
+
+    /// Helper to send an action to the main loop.
+    pub fn send_action(&self, action: Action) -> Result<()> {
+        self.action_tx.send(action).map_err(|_| crate::error::Error::ChannelSend)
+    }
+}
+
+/// Helper function for moving to the next item in a list.
+fn next_item(state: &mut ListState, count: usize) {
+    if count == 0 {
+        state.select(None);
+        return;
+    }
+    let i = match state.selected() {
+        Some(i) => if i >= count - 1 { 0 } else { i + 1 },
+        None => 0,
+    };
+    state.select(Some(i));
+}
+
+/// Helper function for moving to the previous item in a list.
+fn previous_item(state: &mut ListState, count: usize) {
+    if count == 0 {
+        state.select(None);
+        return;
+    }
+    let i = match state.selected() {
+        Some(i) => if i == 0 { count - 1 } else { i - 1 },
+        None => 0,
+    };
+    state.select(Some(i));
 }

@@ -10,11 +10,11 @@
 
 // src/tui.rs
 
-use crate::app::{Action, App, AppMode};
+use crate::app::{Action, App, AppMode, FocusedPanel, PopupMode};
 use crate::error::Result;
 use crossterm::{
     event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{disable_raw_mode, LeaveAlternateScreen},
     ExecutableCommand,
 };
 use ratatui::prelude::{CrosstermBackend, Terminal};
@@ -23,46 +23,35 @@ use std::time::Duration;
 use tokio::sync::mpsc;
 
 /// A struct that handles the terminal user interface lifecycle.
-///
-/// It is responsible for initializing the terminal, drawing the UI, handling events,
-/// and restoring the terminal to its original state upon exit.
 pub struct Tui {
-    /// The `ratatui` terminal instance.
     terminal: Terminal<CrosstermBackend<Stderr>>,
 }
 
 impl Tui {
-    /// Constructs a new `Tui` instance.
     pub fn new() -> Result<Self> {
         let terminal = Terminal::new(CrosstermBackend::new(io::stderr()))?;
         Ok(Self { terminal })
     }
 
-    /// Enters the alternate screen and enables raw mode, preparing the terminal for the TUI.
     pub fn enter(&mut self) -> Result<()> {
-        enable_raw_mode()?;
-        io::stderr().execute(EnterAlternateScreen)?;
+        crossterm::terminal::enable_raw_mode()?;
+        io::stderr().execute(crossterm::terminal::EnterAlternateScreen)?;
         Ok(())
     }
 
-    /// Restores the terminal to its original state by leaving the alternate screen
-    /// and disabling raw mode.
+    /// Restores the terminal to its original state.
     pub fn exit(&mut self) -> Result<()> {
-        io::stderr().execute(LeaveAlternateScreen)?;
         disable_raw_mode()?;
+        io::stderr().execute(LeaveAlternateScreen)?;
         Ok(())
     }
 
-    /// Draws the application's UI by calling the main `draw` function.
     pub fn draw(&mut self, app: &mut App) -> Result<()> {
         self.terminal.draw(|frame| crate::ui::draw(frame, app))?;
         Ok(())
     }
 
     /// Polls for a terminal event and handles it.
-    ///
-    /// This function waits for a short duration for an event. If a key press occurs,
-    /// it's translated into an `Action` and sent over the channel.
     pub fn handle_events(&self, app: &App, action_tx: &mpsc::UnboundedSender<Action>) -> Result<()> {
         if event::poll(Duration::from_millis(50))? {
             if let Event::Key(key) = event::read()? {
@@ -82,50 +71,64 @@ impl Tui {
         action_tx: &mpsc::UnboundedSender<Action>,
     ) -> Result<()> {
         let action = match app.mode {
-            // Keybindings for the initial setup prompt.
-            AppMode::InitRepoPrompt => match key.code {
-                KeyCode::Char('y') | KeyCode::Char('Y') => Action::InitRepo,
-                KeyCode::Char('n') | KeyCode::Char('N') | KeyCode::Char('q') => Action::Quit,
-                _ => return Ok(()), // Ignore other keys in this specific mode.
-            },
-            // Keybindings for when in Normal or Help mode.
-            AppMode::Normal | AppMode::Help => match key.code {
-                KeyCode::Char('q') => Action::Quit,
-                KeyCode::Char('?') => Action::ToggleHelp,
-                KeyCode::Char('j') | KeyCode::Down => Action::NavigateDown,
-                KeyCode::Char('k') | KeyCode::Up => Action::NavigateUp,
-                KeyCode::Char('g') => Action::NavigateTop,
-                KeyCode::Char('G') => Action::NavigateBottom,
-                KeyCode::Char('/') => Action::EnterSearch,
-                KeyCode::Char('r') => Action::RefreshStatus,
-                KeyCode::Char('a') => Action::AddAll,
-                KeyCode::Char('c') => Action::EnterCommit,
-                KeyCode::Char('p') => Action::Push,
-                _ => return Ok(()),
-            },
-            // Keybindings for when in an input mode (Search, Commit, etc.).
-            AppMode::Search | AppMode::CommitInput | AppMode::AddRemote => match key.code {
-                KeyCode::Enter => match app.mode {
-                    AppMode::CommitInput => Action::Commit,
-                    AppMode::AddRemote => Action::AddRemote,
-                    _ => Action::EnterNormal,
-                },
-                KeyCode::Esc => Action::EnterNormal,
-                KeyCode::Char(c) => Action::Input(c),
-                KeyCode::Backspace => Action::InputDelete,
-                _ => return Ok(()),
-            },
+            AppMode::Normal => self.handle_normal_mode_key(key, app),
+            AppMode::Popup(_) => self.handle_popup_mode_key(key, app),
         };
-        // Send the determined action to the main loop for processing.
-        action_tx.send(action).map_err(|_| crate::error::Error::ChannelSend)?;
+
+        if let Some(action) = action {
+            action_tx.send(action).map_err(|_| crate::error::Error::ChannelSend)?;
+        }
+
         Ok(())
+    }
+
+    /// Handles key events when the app is in `AppMode::Normal`.
+    fn handle_normal_mode_key(&self, key: KeyEvent, app: &App) -> Option<Action> {
+        match key.code {
+            // Global keybindings
+            KeyCode::Char('q') => Some(Action::Quit),
+            KeyCode::Char('?') => Some(Action::ToggleHelp),
+            KeyCode::Char('j') | KeyCode::Down => Some(Action::NavigateDown),
+            KeyCode::Char('k') | KeyCode::Up => Some(Action::NavigateUp),
+            KeyCode::Char('l') | KeyCode::Tab => Some(Action::FocusNextPanel),
+            KeyCode::Char('h') | KeyCode::BackTab => Some(Action::FocusPrevPanel),
+            KeyCode::Char('r') => Some(Action::RefreshStatus),
+            KeyCode::Char('a') => Some(Action::StageAll),
+            KeyCode::Char('u') => Some(Action::UnstageAll),
+            KeyCode::Char('c') => Some(Action::EnterPopup(PopupMode::Commit)),
+
+            // Context-sensitive keybindings
+            KeyCode::Char(' ') => match app.focused_panel {
+                FocusedPanel::Unstaged => Some(Action::StageFile),
+                FocusedPanel::Staged => Some(Action::UnstageFile),
+                _ => None,
+            },
+            KeyCode::Enter => match app.focused_panel {
+                FocusedPanel::Menu => Some(Action::ExecuteCommand),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    /// Handles key events when a popup is active.
+    fn handle_popup_mode_key(&self, key: KeyEvent, app: &App) -> Option<Action> {
+        match key.code {
+            KeyCode::Esc => Some(Action::ExitPopup),
+            KeyCode::Enter => match &app.mode {
+                AppMode::Popup(PopupMode::Commit) => Some(Action::Commit),
+                AppMode::Popup(PopupMode::AddRemote) => Some(Action::AddRemote),
+                AppMode::Popup(PopupMode::InitRepo) => Some(Action::InitRepo),
+                _ => None,
+            },
+            KeyCode::Char(c) => Some(Action::Input(c)),
+            KeyCode::Backspace => Some(Action::InputDelete),
+            _ => None,
+        }
     }
 }
 
-/// The `Drop` implementation for `Tui`.
-///
-/// This ensures that `self.exit()` is called when the `Tui` instance goes out of scope,
-/// restoring the terminal to a usable state even if the application panics.
+/// The `Drop` implementation ensures the terminal is restored even on panic.
 impl Drop for Tui {
     fn drop(&mut self) {
         let _ = self.exit();

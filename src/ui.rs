@@ -12,83 +12,78 @@
 
 // src/ui.rs
 
-use crate::app::{App, AppMode};
+use crate::app::{App, AppMode, FocusedPanel, PopupMode};
 use crate::git_utils::FileStatus;
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Wrap},
 };
 
-/// The main drawing function. It now checks for setup mode first.
+/// The main drawing function that orchestrates the rendering of all UI components.
 pub fn draw(f: &mut Frame, app: &mut App) {
-    // If in setup mode, draw a dedicated screen and stop further rendering.
-    if app.mode == AppMode::InitRepoPrompt {
-        render_setup_prompt(f, app);
-        return;
-    }
-
-    // Otherwise, draw the normal UI.
-    let chunks = Layout::default()
+    // Create a main layout with two chunks: one for the main content and one for the status bar.
+    let main_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(0), Constraint::Length(3)].as_ref())
         .split(f.size());
 
-    render_main_list(f, app, chunks[0]);
-    render_status_bar(f, app, chunks[1]);
+    // Create a layout for the three main panels within the top chunk.
+    let top_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .split(main_chunks[0]);
+    
+    let right_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .split(top_chunks[1]);
 
-    // Render popups on top of the normal UI.
-    match &app.mode {
-        AppMode::Help => render_popup(f, "Help", render_help_text()),
-        AppMode::Search => render_input_popup(f, app, "Search"),
-        AppMode::CommitInput => render_input_popup(f, app, "Commit Message"),
-        AppMode::AddRemote => render_input_popup(f, app, "Input Remote URL"),
-        _ => {}
+    // Render the three main panels.
+    render_file_panel(f, app, FocusedPanel::Unstaged, top_chunks[0]);
+    render_file_panel(f, app, FocusedPanel::Staged, right_chunks[0]);
+    render_menu_panel(f, app, right_chunks[1]);
+
+    // Render the status bar at the bottom.
+    render_status_bar(f, app, main_chunks[1]);
+
+    // Render popups conditionally over the main UI.
+    if let AppMode::Popup(popup_mode) = &app.mode {
+        match popup_mode {
+            PopupMode::Commit => render_input_popup(f, app, "Commit Message"),
+            PopupMode::AddRemote => render_input_popup(f, app, "Input Remote URL"),
+            PopupMode::InitRepo => render_init_repo_popup(f),
+            PopupMode::Help => render_help_popup(f),
+        }
     }
 }
 
-/// A new function to render the initial setup prompt.
-fn render_setup_prompt(f: &mut Frame, app: &App) {
-    let text = vec![
-        Line::from(""),
-        Line::from("Welcome to DotaTUI Setup").style(Style::default().bold()),
-        Line::from(""),
-        Line::from(Span::raw(&app.message)),
-        Line::from(""),
-        Line::from(vec![
-            Span::styled("y", Style::default().fg(Color::Green).bold()),
-            Span::raw("es / "),
-            Span::styled("n", Style::default().fg(Color::Red).bold()),
-            Span::raw("o (or q to quit)"),
-        ]),
-    ];
-    let prompt = Paragraph::new(text)
-        .block(Block::default().borders(Borders::ALL).title("Setup Required"))
-        .alignment(Alignment::Center);
-    f.render_widget(prompt, f.size());
-}
+/// Renders a file panel (either Staged or Unstaged).
+fn render_file_panel(f: &mut Frame, app: &mut App, panel_type: FocusedPanel, area: Rect) {
+    let (title, items, state, is_focused) = match panel_type {
+        FocusedPanel::Unstaged => (
+            format!("Unstaged ({})", app.unstaged_changes.len()),
+            &app.unstaged_changes,
+            &mut app.unstaged_state,
+            app.focused_panel == FocusedPanel::Unstaged,
+        ),
+        FocusedPanel::Staged => (
+            format!("Staged ({})", app.staged_changes.len()),
+            &app.staged_changes,
+            &mut app.staged_state,
+            app.focused_panel == FocusedPanel::Staged,
+        ),
+        _ => return,
+    };
 
-/// Renders the main list of file statuses, or a help message if the list is empty.
-fn render_main_list(f: &mut Frame, app: &mut App, area: Rect) {
-    if app.filtered_items.is_empty() && !app.is_loading {
-        let help_text = Paragraph::new(vec![
-            Line::from("").style(Style::default()),
-            Line::from(" ✔ Repository is clean ").style(Style::default().fg(Color::Green)),
-            Line::from(""),
-            Line::from("   Press 'r' to refresh status"),
-            Line::from("   Press 'q' to quit"),
-            Line::from("   Press '?' for all commands"),
-        ])
-        .block(Block::default().borders(Borders::ALL).title("Dotfiles Status"))
-        .alignment(Alignment::Center);
-        f.render_widget(help_text, area);
-        return;
-    }
+    let border_style = if is_focused {
+        Style::default().fg(Color::Cyan)
+    } else {
+        Style::default().fg(Color::DarkGray)
+    };
 
-    let items: Vec<ListItem> = app
-        .filtered_items
+    let list_items: Vec<ListItem> = items
         .iter()
-        .map(|&i| {
-            let item = &app.status_items[i];
+        .map(|item| {
             let style = match item.status {
                 FileStatus::New => Style::default().fg(Color::Green),
                 FileStatus::Modified => Style::default().fg(Color::Yellow),
@@ -102,51 +97,59 @@ fn render_main_list(f: &mut Frame, app: &mut App, area: Rect) {
                 _ => "  ",
             };
             ListItem::new(Line::from(vec![
-                Span::styled(prefix, style.add_modifier(Modifier::BOLD)),
-                Span::raw(item.path.clone()),
+                Span::styled(prefix, style.bold()),
+                Span::raw(&item.path),
             ]))
         })
         .collect();
 
-    let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("Dotfiles Status"))
+    let list = List::new(list_items)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(title)
+                .border_style(border_style),
+        )
         .highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
         .highlight_symbol(">> ");
 
-    f.render_stateful_widget(list, area, &mut app.list_state);
+    f.render_stateful_widget(list, area, state);
 }
 
-/// Renders the status bar with contextual hints.
-fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
-    let mode_text = format!(" Mode: {} ", match app.mode {
-        AppMode::Normal => "NORMAL",
-        AppMode::Search => "SEARCH",
-        AppMode::CommitInput => "COMMIT",
-        AppMode::Help => "HELP",
-        AppMode::AddRemote => "ADD REMOTE",
-        AppMode::InitRepoPrompt => "SETUP",
-    });
-
-    let loading_indicator = if app.is_loading { " [Loading...]" } else { "" };
-
-    let hints = match app.mode {
-        AppMode::Normal => " | ?: Help | q: Quit",
-        AppMode::Search => " | Enter: Apply | Esc: Cancel",
-        AppMode::CommitInput => " | Enter: Commit | Esc: Cancel",
-        AppMode::AddRemote => " | Enter: Save | Esc: Cancel",
-        AppMode::Help => " | ?: Close | q: Quit",
-        AppMode::InitRepoPrompt => " | y: Yes | n: No/Quit",
+/// Renders the command menu panel.
+fn render_menu_panel(f: &mut Frame, app: &mut App, area: Rect) {
+    let is_focused = app.focused_panel == FocusedPanel::Menu;
+    let border_style = if is_focused {
+        Style::default().fg(Color::Cyan)
+    } else {
+        Style::default().fg(Color::DarkGray)
     };
 
-    let left = Span::styled(mode_text, Style::default().bg(Color::Blue).fg(Color::White));
-    let right = Span::styled(
-        format!("{} files{} ", app.status_items.len(), hints),
-        Style::default().fg(Color::Gray),
-    );
+    let items: Vec<ListItem> = app
+        .menu_items
+        .iter()
+        .map(|item| ListItem::new(item.as_str()))
+        .collect();
+
+    let list = List::new(items)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Commands")
+                .border_style(border_style),
+        )
+        .highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
+        .highlight_symbol(">> ");
+
+    f.render_stateful_widget(list, area, &mut app.menu_state);
+}
+
+/// Renders the status bar at the bottom of the screen.
+fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
+    let loading_indicator = if app.is_loading { " [Loading...]" } else { "" };
+    let hints = " | Tab/h/l: Panels | j/k: Navigate | space: Stage/Unstage | c: Commit | ?: Help | q: Quit";
 
     let status_bar = Paragraph::new(Line::from(vec![
-        left,
-        Span::raw(" | "),
         Span::raw(&app.message),
         Span::raw(loading_indicator),
     ]))
@@ -154,47 +157,74 @@ fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
     .block(
         Block::default()
             .borders(Borders::TOP)
-            .title(right)
+            .title(hints)
             .title_alignment(Alignment::Right),
     );
     
     f.render_widget(status_bar, area);
 }
 
-/// Renders a generic popup with a title and content.
-fn render_popup(f: &mut Frame, title: &str, content: Paragraph) {
-    let block = Block::default().title(title).borders(Borders::ALL);
-    let area = centered_rect(60, 50, f.size());
-    let content_with_block = content.block(block).wrap(Wrap { trim: true });
-    f.render_widget(Clear, area);
-    f.render_widget(content_with_block, area);
-}
-
-/// Renders a specific popup for user input.
+/// Renders a popup for user input.
 fn render_input_popup(f: &mut Frame, app: &App, title: &str) {
-    let text = Paragraph::new(app.input.as_str())
-        .block(Block::default().borders(Borders::ALL).title(title));
+    let block = Block::default()
+        .title(title)
+        .borders(Borders::ALL)
+        .title_bottom(Line::from(" Enter: Submit | Esc: Cancel ").centered());
     let area = centered_rect(60, 3, f.size());
+    
+    let input = Paragraph::new(app.input.as_str()).block(block);
+    
     f.render_widget(Clear, area);
-    f.render_widget(text, area);
+    f.render_widget(input, area);
     f.set_cursor(area.x + app.input.len() as u16 + 1, area.y + 1);
 }
 
-/// Creates the content for the help popup.
-fn render_help_text<'a>() -> Paragraph<'a> {
-    Paragraph::new(vec![
+/// Renders a confirmation popup for initializing a repository.
+fn render_init_repo_popup(f: &mut Frame) {
+    let text = vec![
+        Line::from(""),
+        Line::from("No Git repository found in this directory."),
+        Line::from(""),
+        Line::from("Do you want to initialize a new one here?"),
+    ];
+    let block = Block::default()
+        .title("Initialize Repository")
+        .borders(Borders::ALL)
+        .title_bottom(Line::from(" Enter: Yes | Esc: No/Cancel ").centered());
+    
+    let area = centered_rect(50, 25, f.size());
+    let paragraph = Paragraph::new(text).block(block).alignment(Alignment::Center);
+
+    f.render_widget(Clear, area);
+    f.render_widget(paragraph, area);
+}
+
+/// Renders the help popup.
+fn render_help_popup(f: &mut Frame) {
+    let text = vec![
         Line::from(vec![Span::styled("q", Style::default().bold()), Span::raw(": Quit")]),
-        Line::from(vec![Span::styled("j/k/↓/↑", Style::default().bold()), Span::raw(": Navigate list")]),
-        Line::from(vec![Span::styled("g/G", Style::default().bold()), Span::raw(": Go to top/bottom")]),
-        Line::from(vec![Span::styled("/", Style::default().bold()), Span::raw(": Search files")]),
-        Line::from(vec![Span::styled("a", Style::default().bold()), Span::raw(": Add all changes")]),
-        Line::from(vec![Span::styled("c", Style::default().bold()), Span::raw(": Enter commit mode")]),
-        Line::from(vec![Span::styled("Enter", Style::default().bold()), Span::raw(": (In commit mode) Submit commit")]),
-        Line::from(vec![Span::styled("p", Style::default().bold()), Span::raw(": Push to remote")]),
+        Line::from(vec![Span::styled("j/k/↓/↑", Style::default().bold()), Span::raw(": Navigate lists")]),
+        Line::from(vec![Span::styled("Tab/h/l", Style::default().bold()), Span::raw(": Cycle focus between panels")]),
+        Line::from(vec![Span::styled("space", Style::default().bold()), Span::raw(": Stage/unstage selected file")]),
+        Line::from(vec![Span::styled("a", Style::default().bold()), Span::raw(": Stage all unstaged files")]),
+        Line::from(vec![Span::styled("u", Style::default().bold()), Span::raw(": Unstage all staged files")]),
+        Line::from(vec![Span::styled("c", Style::default().bold()), Span::raw(": Open commit message input")]),
+        Line::from(vec![Span::styled("Enter", Style::default().bold()), Span::raw(": (In Commands panel) Execute selected command")]),
         Line::from(vec![Span::styled("r", Style::default().bold()), Span::raw(": Refresh status")]),
         Line::from(vec![Span::styled("?", Style::default().bold()), Span::raw(": Toggle this help screen")]),
-        Line::from(vec![Span::styled("Esc", Style::default().bold()), Span::raw(": Exit current mode")]),
-    ])
+        Line::from(vec![Span::styled("Esc", Style::default().bold()), Span::raw(": Close any popup")]),
+    ];
+    
+    let block = Block::default()
+        .title("Help")
+        .borders(Borders::ALL)
+        .title_bottom(Line::from(" Press ? or Esc to close ").centered());
+        
+    let area = centered_rect(60, 60, f.size());
+    let paragraph = Paragraph::new(text).block(block).wrap(Wrap { trim: true });
+
+    f.render_widget(Clear, area);
+    f.render_widget(paragraph, area);
 }
 
 /// Helper function to create a centered rectangle for popups.

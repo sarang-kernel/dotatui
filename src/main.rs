@@ -19,7 +19,7 @@ mod git_utils;
 mod tui;
 mod ui;
 
-use crate::app::{Action, App, AppMode};
+use crate::app::{Action, App, PopupMode};
 use crate::config::Config;
 use crate::error::Result;
 use crate::tui::Tui;
@@ -58,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// The core application loop, now with initial setup detection.
+/// The core application loop.
 async fn run_app(
     app: &mut App,
     tui: &mut Tui,
@@ -69,19 +69,14 @@ async fn run_app(
 
     tui.enter()?;
 
-    // --- Initial Repository Check ---
+    // Initial Repository Check
     match Repository::open(&dotfiles_path) {
         Ok(_) => {
-            // Repository exists, start normal operation.
             app.send_action(Action::RefreshStatus)?;
         }
         Err(_) => {
-            // No repository found, enter setup mode.
-            app.mode = AppMode::InitRepoPrompt;
-            app.message = format!(
-                "No git repository found in {:?}. Initialize one now?",
-                dotfiles_path
-            );
+            // If no repo, immediately enter the InitRepo popup mode.
+            app.send_action(Action::EnterPopup(PopupMode::InitRepo))?;
         }
     }
 
@@ -106,21 +101,18 @@ async fn run_app(
     Ok(())
 }
 
-/// Handles actions with side effects, now including `InitRepo`.
+/// Handles actions with side effects.
 async fn handle_action(
     action: &Action,
     app: &mut App,
-    _config: &mut Config,
+    config: &mut Config,
     dotfiles_path: &PathBuf,
 ) -> Result<()> {
+    // First, update the app's internal state based on the action.
     app.update(action)?;
 
+    // Then, perform any side effects (like Git operations).
     match action {
-        Action::InitRepo => {
-            git_utils::init_repo(dotfiles_path)?;
-            // After initializing, immediately prompt for the remote URL for a smooth setup flow.
-            app.send_action(Action::EnterAddRemote)?;
-        }
         Action::RefreshStatus => {
             let tx = app.action_tx.clone();
             let path = dotfiles_path.clone();
@@ -132,17 +124,39 @@ async fn handle_action(
                 tx.send(Action::StatusUpdated(status_result)).unwrap_or_default();
             });
         }
-        Action::AddAll => {
+        Action::StageFile => {
+            if let Some(file) = app.get_selected_unstaged_file() {
+                if let Ok(repo) = Repository::open(dotfiles_path) {
+                    git_utils::stage_file(&repo, &file.path)?;
+                    app.send_action(Action::RefreshStatus)?;
+                }
+            }
+        }
+        Action::UnstageFile => {
+            if let Some(file) = app.get_selected_staged_file() {
+                if let Ok(repo) = Repository::open(dotfiles_path) {
+                    git_utils::unstage_file(&repo, &file.path)?;
+                    app.send_action(Action::RefreshStatus)?;
+                }
+            }
+        }
+        Action::StageAll => {
             if let Ok(repo) = Repository::open(dotfiles_path) {
-                git_utils::add_all(&repo)?;
+                git_utils::stage_all(&repo)?;
+                app.send_action(Action::RefreshStatus)?;
+            }
+        }
+        Action::UnstageAll => {
+            if let Ok(repo) = Repository::open(dotfiles_path) {
+                git_utils::unstage_all(&repo)?;
                 app.send_action(Action::RefreshStatus)?;
             }
         }
         Action::Commit => {
-            if let (Ok(repo), AppMode::CommitInput) = (Repository::open(dotfiles_path), &app.mode) {
-                if !app.input.is_empty() {
+            if !app.input.is_empty() {
+                if let Ok(repo) = Repository::open(dotfiles_path) {
                     git_utils::commit(&repo, &app.input)?;
-                    app.send_action(Action::EnterNormal)?;
+                    app.send_action(Action::ExitPopup)?;
                     app.send_action(Action::RefreshStatus)?;
                 }
             }
@@ -154,9 +168,7 @@ async fn handle_action(
                 let result = (|| -> Result<()> {
                     let repo = Repository::open(&path)?;
                     if !git_utils::has_remote(&repo) {
-                        // If user tries to push without a remote, guide them to add one.
-                        tx.send(Action::EnterAddRemote).unwrap_or_default();
-                        // Return a user-friendly error to display.
+                        tx.send(Action::EnterPopup(PopupMode::AddRemote)).unwrap_or_default();
                         return Err(error::Error::Git(git2::Error::from_str(
                             "No remote 'origin' found. Please add one.",
                         )));
@@ -164,21 +176,36 @@ async fn handle_action(
                     git_utils::push(&repo)?;
                     Ok(())
                 })();
-                // Only send PushCompleted if we actually tried to push.
                 if result.is_ok() {
                     tx.send(Action::PushCompleted(result)).unwrap_or_default();
                 }
             });
         }
+        Action::ExecuteCommand => {
+            if let Some(index) = app.menu_state.selected() {
+                match app.menu_items.get(index).map(|s| s.as_str()) {
+                    Some("Commit") => app.send_action(Action::EnterPopup(PopupMode::Commit))?,
+                    Some("Push") => app.send_action(Action::Push)?,
+                    Some("Stage All") => app.send_action(Action::StageAll)?,
+                    Some("Unstage All") => app.send_action(Action::UnstageAll)?,
+                    Some("Refresh") => app.send_action(Action::RefreshStatus)?,
+                    Some("Init Repo") => app.send_action(Action::EnterPopup(PopupMode::InitRepo))?,
+                    _ => {}
+                }
+            }
+        }
+        Action::InitRepo => {
+            git_utils::init_repo(dotfiles_path)?;
+            app.send_action(Action::ExitPopup)?;
+            app.send_action(Action::EnterPopup(PopupMode::AddRemote))?;
+        }
         Action::AddRemote => {
-            if let (Ok(repo), AppMode::AddRemote) = (Repository::open(dotfiles_path), &app.mode) {
-                if !app.input.is_empty() {
+            if !app.input.is_empty() {
+                if let Ok(repo) = Repository::open(dotfiles_path) {
                     git_utils::add_remote(&repo, &app.input)?;
                     config.remote_url = Some(app.input.clone());
                     config.save()?;
-                    app.message = "Remote 'origin' added successfully.".to_string();
-                    app.send_action(Action::EnterNormal)?;
-                    app.send_action(Action::RefreshStatus)?;
+                    app.send_action(Action::ExitPopup)?;
                 }
             }
         }

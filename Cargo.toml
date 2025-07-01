@@ -1,38 +1,16 @@
-# dotatui/Cargo.toml
- 
 [package]
 name = "dotatui"
 version = "0.1.0"
 edition = "2021"
-authors = ["Sarang Vehale sarang.kernel@gmail.com"]
-description = "A robust, efficient TUI for managing dotfiles with Git."
-license = "MIT"
 
 [dependencies]
-# The core TUI library for drawing widgets in the terminal.
 ratatui = { version = "0.26.1", features = ["all-widgets"] }
-
-# The backend for ratatui, providing terminal manipulation and event handling.
 crossterm = "0.27.0"
-
-# A safe, native Rust binding to the libgit2 library for all Git operations.
 git2 = "0.18.3"
-
-# For serializing and deserializing our configuration data (e.g., to/from TOML).
-serde = { version = "1.0.197", features = ["derive"] }
-
-# A parser and encoder for the TOML configuration file format.
-toml = "0.8.12"
-
-# A helper library to find standard platform-specific directories (like config).
-directories = "5.0.1"
-
-# A powerful library for creating custom, ergonomic error types.
-thiserror = "1.0.58"
-
-# The de-facto standard for asynchronous programming in Rust.
-# CORRECTION: Added the "time" feature to enable `tokio::time::sleep`.
-tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread", "sync", "time"] }
-
-# A simple, flexible error handling library used at the top level in `main.rs`.
+tokio = { version = "1.36.0", features = ["full"] }
 anyhow = "1.0.81"
+chrono = "0.4.35"
+thiserror = "1.0.58" # <-- THIS WAS THE MISSING DEPENDENCY
+
+[dev-dependencies]
+tempfile = "3.10.1"

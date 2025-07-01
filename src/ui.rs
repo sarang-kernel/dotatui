@@ -1,199 +1,244 @@
-// src/ui.rs
+//! src/ui.rs
 
-use crate::app::{App, AppMode, PopupMode};
-use crate::git_utils::{FileState, FileStatus, StagingStatus};
+use crate::app::{App, Mode, Popup};
+use crate::git::StatusItem; // Correctly import StatusItem directly
+use git2::Status;
 use ratatui::{
     prelude::*,
-    widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Wrap},
+    widgets::{Block, Borders, Cell, Clear, List, ListItem, Paragraph, Row, Table, Tabs, Wrap},
 };
 
-/// The main drawing function that orchestrates the rendering of all UI components.
-pub fn draw(f: &mut Frame, app: &mut App) {
-    // Create a main layout with two chunks: one for the main content and one for the status bar.
-    let main_chunks = Layout::default()
+pub fn render(frame: &mut Frame, app: &mut App) {
+    let main_layout = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Min(0), Constraint::Length(1)].as_ref())
-        .split(f.size());
+        .constraints([Constraint::Length(1), Constraint::Min(0), Constraint::Length(1)])
+        .split(frame.size());
 
-    // Split the main content area into two panels: Files and Diff.
-    let top_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(40), Constraint::Percentage(60)].as_ref())
-        .split(main_chunks[0]);
+    render_tabs(frame, app, main_layout[0]);
+    render_footer(frame, app, main_layout[2]);
 
-    render_file_panel(f, app, top_chunks[0]);
-    render_diff_panel(f, app, top_chunks[1]);
-    render_status_bar(f, app, main_chunks[1]);
+    match app.mode {
+        Mode::Status => render_status_view(frame, app, main_layout[1]),
+        Mode::Log => render_log_view(frame, app, main_layout[1]),
+    }
 
-    // Render popups on top of the main UI if the app is in a popup mode.
-    if let AppMode::Popup(popup_mode) = &app.mode {
-        match popup_mode {
-            PopupMode::Commit => render_input_popup(f, app, "Commit Message"),
-            PopupMode::AddRemote => render_input_popup(f, app, "Input Remote URL"),
-            PopupMode::InitRepo => render_init_repo_popup(f),
-            PopupMode::ChangePath => render_input_popup(f, app, "Change Dotfiles Path"),
-            PopupMode::Help => render_help_popup(f),
-        }
+    if let Some(popup) = &app.popup {
+        // Pass only the necessary data to the popup renderer to satisfy the borrow checker.
+        render_popup(frame, popup, &app.commit_msg, app.cursor_pos);
     }
 }
 
-/// Renders the unified file list panel.
-fn render_file_panel(f: &mut Frame, app: &mut App, area: Rect) {
-    let list_items: Vec<ListItem> = app
-        .files
-        .iter()
-        .map(|file| {
-            let (status_char, status_style) = match file.status {
-                FileStatus::New => ("A", Style::default().fg(Color::Green)),
-                FileStatus::Modified => ("M", Style::default().fg(Color::Yellow)),
-                FileStatus::Deleted => ("D", Style::default().fg(Color::Red)),
-                FileStatus::Renamed => ("R", Style::default().fg(Color::Cyan)),
-                FileStatus::Typechange => ("T", Style::default().fg(Color::Magenta)),
-                FileStatus::Conflicted => ("C", Style::default().fg(Color::LightRed)),
-            };
+fn render_tabs(frame: &mut Frame, app: &App, area: Rect) {
+    let titles = vec!["[S]tatus", "[L]og"];
+    let selected_index = match app.mode {
+        Mode::Status => 0,
+        Mode::Log => 1,
+    };
+    let tabs = Tabs::new(titles)
+        .block(Block::default())
+        .select(selected_index)
+        .style(Style::default().fg(Color::Gray))
+        .highlight_style(
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .bg(Color::DarkGray),
+        );
+    frame.render_widget(tabs, area);
+}
 
-            let (staging_char, staging_style) = match file.staging_status {
-                StagingStatus::Staged => ("S", Style::default().fg(Color::Green)),
-                StagingStatus::Unstaged => ("U", Style::default().fg(Color::Yellow)),
-                StagingStatus::PartiallyStaged => ("P", Style::default().fg(Color::LightMagenta)),
-            };
+fn render_status_view(frame: &mut Frame, app: &mut App, area: Rect) {
+    let chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(40), Constraint::Percentage(60)].as_ref())
+        .split(area);
 
-            let line = Line::from(vec![
-                Span::styled(format!("[{}]", staging_char), staging_style.bold()),
-                Span::raw(" "),
-                Span::styled(format!("[{}]", status_char), status_style.bold()),
-                Span::raw(" "),
-                Span::raw(&file.path),
-            ]);
-            ListItem::new(line)
+    // Left Panel: Files
+    let (staged_items, unstaged_items): (Vec<_>, Vec<_>) =
+        app.status_items.iter().partition(|item| item.is_staged);
+
+    let mut all_list_items = Vec::new();
+    if !staged_items.is_empty() {
+        all_list_items
+            .push(ListItem::new("Staged changes:").style(Style::default().add_modifier(Modifier::BOLD)));
+        all_list_items.extend(staged_items.iter().map(|item| status_to_list_item(item)));
+    }
+    if !unstaged_items.is_empty() {
+        all_list_items.push(
+            ListItem::new("Unstaged changes:").style(Style::default().add_modifier(Modifier::BOLD)),
+        );
+        all_list_items.extend(unstaged_items.iter().map(|item| status_to_list_item(item)));
+    }
+
+    let file_list = List::new(all_list_items)
+        .block(Block::default().borders(Borders::ALL).title("Files"))
+        .highlight_style(Style::default().bg(Color::DarkGray))
+        .highlight_symbol(">> ");
+    frame.render_stateful_widget(file_list, chunks[0], &mut app.status_list_state);
+
+    // Right Panel: Diff
+    let diff_text = if let Some(item) = app.get_selected_status_item() {
+        app.repo
+            .get_diff(item)
+            .unwrap_or_else(|_| "Error loading diff".to_string())
+    } else {
+        "Select a file to see the diff.".to_string()
+    };
+
+    let diff_lines: Vec<Line> = diff_text
+        .lines()
+        .map(|line| {
+            let (style, line_content) = if line.starts_with('+') {
+                (Style::default().fg(Color::Green), line)
+            } else if line.starts_with('-') {
+                (Style::default().fg(Color::Red), line)
+            } else if line.starts_with("@@") {
+                (Style::default().fg(Color::Cyan), line)
+            } else {
+                (Style::default(), line)
+            };
+            Line::styled(line_content.to_string(), style)
         })
         .collect();
 
-    let list = List::new(list_items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(format!("Files ({})", app.files.len())),
-        )
-        .highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
-        .highlight_symbol(">> ");
-
-    f.render_stateful_widget(list, area, &mut app.file_list_state);
+    let diff_view = Paragraph::new(diff_lines).block(Block::default().borders(Borders::ALL).title("Diff"));
+    frame.render_widget(diff_view, chunks[1]);
 }
 
-/// Renders the diff panel with colored lines.
-fn render_diff_panel(f: &mut Frame, app: &App, area: Rect) {
-    let lines: Vec<Line> = app.diff_text.lines().map(|line| {
-        let style = match line.chars().next() {
-            Some('+') => Style::default().fg(Color::Green),
-            Some('-') => Style::default().fg(Color::Red),
-            _ => Style::default(),
-        };
-        Line::from(Span::styled(line, style))
-    }).collect();
+fn render_log_view(frame: &mut Frame, app: &mut App, area: Rect) {
+    let header_cells = ["Commit", "Author", "Date"]
+        .iter()
+        .map(|h| Cell::from(*h).style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)));
+    let header = Row::new(header_cells).height(1).bottom_margin(1);
 
-    let paragraph = Paragraph::new(lines)
-        .block(Block::default().borders(Borders::ALL).title("Diff"))
-        .wrap(Wrap { trim: true });
+    let rows = app.log_entries.iter().map(|commit| {
+        Row::new(vec![
+            Cell::from(commit.id.clone()),
+            Cell::from(commit.author.clone()),
+            Cell::from(commit.time.clone()),
+        ])
+    });
 
-    f.render_widget(paragraph, area);
+    let table = Table::new(
+        rows,
+        [
+            Constraint::Length(8),
+            Constraint::Length(15),
+            Constraint::Min(20),
+        ],
+    )
+    .header(header)
+    .block(Block::default().borders(Borders::ALL).title("Log"))
+    .highlight_style(Style::default().bg(Color::DarkGray))
+    .highlight_symbol(">> ");
+
+    frame.render_stateful_widget(table, area, &mut app.log_table_state);
 }
 
-/// Renders the permanent status bar at the bottom.
-fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
-    let loading_indicator = if app.is_loading { " [Loading...]" } else { "" };
-    let hints = "j/k: Nav | space: Stage/Unstage | a: Stage All | c: Commit | P: Push | ?: Help | q: Quit";
-
-    let left = Span::raw(format!("{}{}", app.message, loading_indicator));
-    let right = Span::styled(hints, Style::default().fg(Color::DarkGray));
-
-    let status_bar = Paragraph::new(Line::from(vec![left, Span::raw(" | ").fg(Color::DarkGray), right]))
-        .block(Block::default().style(Style::default().bg(Color::Black)));
-    
-    f.render_widget(status_bar, area);
+fn status_to_list_item(item: &StatusItem) -> ListItem {
+    let (prefix, color) = status_to_prefix_and_color(item.status);
+    let style = Style::default().fg(color);
+    ListItem::new(Line::from(vec![
+        Span::styled(prefix, style.clone().add_modifier(Modifier::BOLD)),
+        Span::styled(item.path.clone(), style),
+    ]))
 }
 
-/// Renders a generic popup for user input.
-fn render_input_popup(f: &mut Frame, app: &App, title: &str) {
-    let block = Block::default()
-        .title(title)
-        .borders(Borders::ALL)
-        .title_bottom(Line::from(" Enter: Submit | Esc: Cancel ").centered());
-    let area = centered_rect(60, 3, f.size());
-    
-    let input = Paragraph::new(app.input.as_str()).block(block);
-    
-    f.render_widget(Clear, area);
-    f.render_widget(input, area);
-    f.set_cursor(area.x + app.input.len() as u16 + 1, area.y + 1);
+fn status_to_prefix_and_color(status: Status) -> (&'static str, Color) {
+    if status.is_wt_new() || status.is_index_new() {
+        ("A ", Color::Green)
+    } else if status.is_wt_modified() || status.is_index_modified() {
+        ("M ", Color::Yellow)
+    } else if status.is_wt_deleted() || status.is_index_deleted() {
+        ("D ", Color::Red)
+    } else if status.is_wt_renamed() || status.is_index_renamed() {
+        ("R ", Color::Cyan)
+    } else if status.is_wt_typechange() || status.is_index_typechange() {
+        ("T ", Color::Magenta)
+    } else {
+        ("? ", Color::White)
+    }
 }
 
-/// Renders a confirmation popup for initializing a repository.
-fn render_init_repo_popup(f: &mut Frame) {
-    let text = vec![
-        Line::from(""),
-        Line::from("No Git repository found in this directory."),
-        Line::from(""),
-        Line::from("Do you want to initialize a new one here?"),
-    ];
-    let block = Block::default()
-        .title("Initialize Repository")
-        .borders(Borders::ALL)
-        .title_bottom(Line::from(" Enter: Yes | Esc: No/Cancel ").centered());
-    
-    let area = centered_rect(50, 25, f.size());
-    let paragraph = Paragraph::new(text).block(block).alignment(Alignment::Center);
+fn render_popup(frame: &mut Frame, popup: &Popup, commit_msg: &str, cursor_pos: usize) {
+    let popup_area = centered_rect(60, 25, frame.size());
+    let block = Block::default().borders(Borders::ALL);
+    frame.render_widget(Clear, popup_area); // This clears the background
 
-    f.render_widget(Clear, area);
-    f.render_widget(paragraph, area);
+    let content = match popup {
+        Popup::Help => {
+            let text = vec![
+                Line::from(vec![
+                    Span::styled("q", Style::default().bold()),
+                    Span::raw(": quit"),
+                ]),
+                Line::from(""),
+                Line::from(vec![
+                    Span::styled("s", Style::default().bold()),
+                    Span::raw(": Status View"),
+                ]),
+                Line::from(vec![
+                    Span::styled("l", Style::default().bold()),
+                    Span::raw(": Log View"),
+                ]),
+                Line::from(""),
+                Line::from(vec![
+                    Span::styled("j/k", Style::default().bold()),
+                    Span::raw(" or "),
+                    Span::styled("↓/↑", Style::default().bold()),
+                    Span::raw(": navigate lists"),
+                ]),
+                Line::from(vec![
+                    Span::styled("space", Style::default().bold()),
+                    Span::raw(": stage item"),
+                ]),
+                Line::from(vec![
+                    Span::styled("u", Style::default().bold()),
+                    Span::raw(": unstage item"),
+                ]),
+                Line::from(vec![
+                    Span::styled("c", Style::default().bold()),
+                    Span::raw(": commit"),
+                ]),
+                Line::from(vec![
+                    Span::styled("Shift+P", Style::default().bold()),
+                    Span::raw(": push to origin"),
+                ]),
+                Line::from(""),
+                Line::from(vec![
+                    Span::styled("esc", Style::default().bold()),
+                    Span::raw(": close popups"),
+                ]),
+                Line::from(vec![
+                    Span::styled("enter", Style::default().bold()),
+                    Span::raw(": confirm actions"),
+                ]),
+            ];
+            Paragraph::new(text)
+                .block(block.title(" Help (?) "))
+                .alignment(Alignment::Left)
+        }
+        Popup::Commit => {
+            let p = Paragraph::new(commit_msg)
+                .block(block.title(" Commit Message (Enter to confirm, Esc to cancel) "));
+            // Set cursor for input
+            frame.set_cursor(popup_area.x + cursor_pos as u16 + 1, popup_area.y + 1);
+            p
+        }
+        Popup::Pushing(msg) => Paragraph::new(msg.clone())
+            .block(block.title(" Pushing to remote... (Esc to close) "))
+            .alignment(Alignment::Center)
+            .wrap(Wrap { trim: true }),
+    };
+
+    frame.render_widget(content, popup_area);
 }
 
-/// Renders the descriptive help popup with new ASCII art.
-fn render_help_popup(f: &mut Frame) {
-    let logo = vec![
-        Line::from(""),
-        Line::from("    _       _   _   _ "),
-        Line::from("   / \\   __| | | |_| |"),
-        Line::from("  / _ \\ / _` | | __| |"),
-        Line::from(" / ___ \\ (_| | | |_| |"),
-        Line::from("/_/   \\_\\__,_|  \\__|_|"),
-        Line::from(""),
-    ];
-
-    let text = vec![
-        Line::from("").style(Style::default()),
-        Line::from(" Global Commands").style(Style::default().bold().underlined()),
-        Line::from(vec![Span::styled("  q", Style::default().bold()), Span::raw(": Quit the application.")]),
-        Line::from(vec![Span::styled("  ?", Style::default().bold()), Span::raw(": Toggle this help popup.")]),
-        Line::from(vec![Span::styled("  r", Style::default().bold()), Span::raw(": Manually refresh the Git status.")]),
-        Line::from(""),
-        Line::from(" File Actions").style(Style::default().bold().underlined()),
-        Line::from(vec![Span::styled("  j/k, ↓/↑", Style::default().bold()), Span::raw(": Navigate up and down the file list.")]),
-        Line::from(vec![Span::styled("  space", Style::default().bold()), Span::raw(":     Stage or unstage the selected file.")]),
-        Line::from(vec![Span::styled("  a", Style::default().bold()), Span::raw(":         Stage all unstaged files.")]),
-        Line::from(vec![Span::styled("  c", Style::default().bold()), Span::raw(":         Open the commit message input popup.")]),
-        Line::from(vec![Span::styled("  P (Shift+P)", Style::default().bold()), Span::raw(": Push staged changes to the remote.")]),
-    ];
-    
-    let block = Block::default()
-        .title("Help")
-        .borders(Borders::ALL)
-        .title_bottom(Line::from(" Press ? or Esc to close ").centered());
-        
-    let area = centered_rect(80, 80, f.size());
-    let content_chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Length(7), Constraint::Min(0)])
-        .margin(1)
-        .split(area);
-
-    let logo_p = Paragraph::new(logo).alignment(Alignment::Center);
-    let paragraph = Paragraph::new(text).wrap(Wrap { trim: true });
-
-    f.render_widget(Clear, area);
-    f.render_widget(block, area);
-    f.render_widget(logo_p, content_chunks[0]);
-    f.render_widget(paragraph, content_chunks[1]);
+fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
+    let text = format!("Repo: {} | Press '?' for help", app.repo.path_str());
+    let footer = Paragraph::new(text)
+        .style(Style::default().fg(Color::DarkGray))
+        .alignment(Alignment::Left);
+    frame.render_widget(footer, area);
 }
 
 /// Helper function to create a centered rectangle for popups.

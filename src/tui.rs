@@ -62,6 +62,12 @@ impl Tui {
                 if let Event::Key(key) = event::read()? {
                     if key.kind == KeyEventKind::Press {
                         match key.code {
+                            KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
+                                return Err(error::Error::Io(io::Error::new(
+                                    io::ErrorKind::Interrupted,
+                                    "Setup cancelled by user",
+                                )));
+                            }
                             KeyCode::Enter => {
                                 if !path_input.is_empty() {
                                     break;
@@ -73,14 +79,9 @@ impl Tui {
                             KeyCode::Backspace => {
                                 path_input.pop();
                             }
-                            KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
-                                return Err(error::Error::Io(io::Error::new(
-                                    io::ErrorKind::Interrupted,
-                                    "Setup cancelled by user",
-                                )));
-                            }
-                            _ => {}
                         }
+                        _ => {}
+                        
                     }
                 }
             }

@@ -1,15 +1,3 @@
-// This file contains all the rendering logic. It takes the application state (App) and a ratatui Frame and draws the widgets. By keeping all drawing code here, we maintain a clean separation between application logic (state changes) and presentation (how the state is displayed).
-
-// Key features of this file:
-
-//    Declarative UI: The code describes what to draw, and ratatui handles how to draw it. This makes the UI code easy to read and modify.
-
-//    Component-Based: The UI is broken down into smaller, manageable functions (render_main_list, render_status_bar, render_popup), making the code reusable and organized.
-
-//    State-Driven: The UI is a pure function of the App state. For example, it shows a loading indicator if app.is_loading is true, and it displays different popups based on app.mode.
-
-//    Efficiency: It only draws what's necessary for the current frame. The Clear widget is used for popups to avoid redrawing the entire screen, which is a minor but good optimization.
-
 // src/ui.rs
 
 use crate::app::{App, AppMode, FocusedPanel, PopupMode};
@@ -21,36 +9,15 @@ use ratatui::{
 
 /// The main drawing function that orchestrates the rendering of all UI components.
 pub fn draw(f: &mut Frame, app: &mut App) {
-    // Create a main layout with two chunks: one for the main content and one for the status bar.
-    let main_chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Min(0), Constraint::Length(3)].as_ref())
-        .split(f.size());
+    // Render a background block to clear the screen on every frame.
+    f.render_widget(Block::default(), f.size());
 
-    // Create a layout for the three main panels within the top chunk.
-    let top_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-        .split(main_chunks[0]);
-    
-    let right_chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-        .split(top_chunks[1]);
-    
     // Main router for different views
     match app.mode {
         AppMode::Home => render_home(f, app),
         AppMode::Status => render_status_view(f, app),
-        _ => {} // Popups are handled seperately
+        _ => {} // Popups are handled on top of the current view
     }
-    // Render the three main panels.
-    render_file_panel(f, app, FocusedPanel::Unstaged, top_chunks[0]);
-    render_file_panel(f, app, FocusedPanel::Staged, right_chunks[0]);
-    render_menu_panel(f, app, right_chunks[1]);
-
-    // Render the status bar at the bottom.
-    render_status_bar(f, app, main_chunks[1]);
 
     // Render popups conditionally over the main UI.
     if let AppMode::Popup(popup_mode) = &app.mode {
@@ -63,15 +30,27 @@ pub fn draw(f: &mut Frame, app: &mut App) {
     }
 }
 
-// Corrected code
+/// Renders the Home screen with the new ASCII art logo.
 fn render_home(f: &mut Frame, app: &App) {
+    // ASCII Art Logo
     let logo = vec![
         Line::from(""),
-        Line::from("  ____            _   _   _ "),
-        Line::from(" |  _ \\   ___  __| | | |_| |"),
-        Line::from(" | | | | / _ \\/ _` | | __| |"),
-        Line::from(" | |_| ||  __/ (_| | | |_| |"),
-        Line::from(" |____/  \\___|\\__,_|  \\__|_|"),
+        Line::from("DDDDDDDDDDDDD                                  tttt                                    tttt                              iiii  "),
+        Line::from("D::::::::::::DDD                            ttt:::t                                 ttt:::t                             i::::i "),
+        Line::from("D:::::::::::::::DD                          t:::::t                                 t:::::t                              iiii  "),
+        Line::from("DDD:::::DDDDD:::::D                         t:::::t                                 t:::::t                                    "),
+        Line::from("  D:::::D    D:::::D    ooooooooooo   ttttttt:::::ttttttt      aaaaaaaaaaaaa  ttttttt:::::ttttttt    uuuuuu    uuuuuu  iiiiiii "),
+        Line::from("  D:::::D     D:::::D oo:::::::::::oo t:::::::::::::::::t      a::::::::::::a t:::::::::::::::::t    u::::u    u::::u  i:::::i "),
+        Line::from("  D:::::D     D:::::Do:::::::::::::::ot:::::::::::::::::t      aaaaaaaaa:::::at:::::::::::::::::t    u::::u    u::::u   i::::i "),
+        Line::from("  D:::::D     D:::::Do:::::ooooo:::::otttttt:::::::tttttt               a::::atttttt:::::::tttttt    u::::u    u::::u   i::::i "),
+        Line::from("  D:::::D     D:::::Do::::o     o::::o      t:::::t              aaaaaaa:::::a      t:::::t          u::::u    u::::u   i::::i "),
+        Line::from("  D:::::D     D:::::Do::::o     o::::o      t:::::t            aa::::::::::::a      t:::::t          u::::u    u::::u   i::::i "),
+        Line::from("  D:::::D     D:::::Do::::o     o::::o      t:::::t           a::::aaaa::::::a      t:::::t          u::::u    u::::u   i::::i "),
+        Line::from("  D:::::D    D:::::D o::::o     o::::o      t:::::t    tttttta::::a    a:::::a      t:::::t    ttttttu:::::uuuu:::::u   i::::i "),
+        Line::from("DDD:::::DDDDD:::::D  o:::::ooooo:::::o      t::::::tttt:::::ta::::a    a:::::a      t::::::tttt:::::tu:::::::::::::::uui::::::i"),
+        Line::from("D:::::::::::::::DD   o:::::::::::::::o      tt::::::::::::::ta:::::aaaa::::::a      tt::::::::::::::t u:::::::::::::::ui::::::i"),
+        Line::from("D::::::::::::DDD      oo:::::::::::oo         tt:::::::::::tt a::::::::::aa:::a       tt:::::::::::tt  uu::::::::uu:::ui::::::i"),
+        Line::from("DDDDDDDDDDDDD           ooooooooooo             ttttttttttt    aaaaaaaaaa  aaaa         ttttttttttt      uuuuuuuu  uuuuiiiiiiii"),
         Line::from(""),
     ];
 
@@ -97,39 +76,40 @@ fn render_home(f: &mut Frame, app: &App) {
     let menu_lines = vec![
         Line::from(""),
         Line::from(vec![
-            Span::styled("[s]", Style::default().fg(Color::Green).bold()), // Corrected: Style
+            Span::styled("[s]", Style::default().fg(Color::Green).bold()),
             Span::raw(" Status"),
         ]),
         Line::from(vec![
-            Span::styled("[h]", Style::default().fg(Color::Green).bold()), // Corrected: Style
+            Span::styled("[h]", Style::default().fg(Color::Green).bold()),
             Span::raw(" Help"),
         ]),
         Line::from(vec![
-            Span::styled("[q]", Style::default().fg(Color::Green).bold()), // Corrected: Style
+            Span::styled("[q]", Style::default().fg(Color::Green).bold()),
             Span::raw(" Quit"),
         ]),
     ];
 
     let logo_p = Paragraph::new(logo).alignment(Alignment::Center);
     let status_p = Paragraph::new(status_lines).alignment(Alignment::Center);
-    let menu_p = Paragraph::new(menu_lines).alignment(Alignment::Center); // Corrected: menu_lines
+    let menu_p = Paragraph::new(menu_lines).alignment(Alignment::Center);
 
+    // Adjust layout constraints to better fit the larger logo
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Percentage(40),
-            Constraint::Percentage(20),
-            Constraint::Percentage(40),
+            Constraint::Percentage(65), // More space for the logo
+            Constraint::Percentage(15), // Less space for status
+            Constraint::Percentage(20), // Space for the menu
         ])
         .split(f.size());
 
-    f.render_widget(logo_p, chunks[0]); // Corrected: render_widget
+    f.render_widget(logo_p, chunks[0]);
     f.render_widget(status_p, chunks[1]);
     f.render_widget(menu_p, chunks[2]);
 }
 
 /// Renders the main three-panel status view.
-fn render_status_view(f: &mut Frame, app: &mut App){
+fn render_status_view(f: &mut Frame, app: &mut App) {
     let main_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(0), Constraint::Length(3)].as_ref())
@@ -139,7 +119,7 @@ fn render_status_view(f: &mut Frame, app: &mut App){
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
         .split(main_chunks[0]);
-
+    
     let right_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
@@ -242,7 +222,7 @@ fn render_menu_panel(f: &mut Frame, app: &mut App, area: Rect) {
 /// Renders the status bar at the bottom of the screen.
 fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
     let loading_indicator = if app.is_loading { " [Loading...]" } else { "" };
-    let hints = " | Tab/h/l: Panels | j/k: Navigate | space: Stage/Unstage | c: Commit | ?: Help | q: Quit";
+    let hints = " | Tab/l: Next Panel | Shift+Tab/h: Prev Panel | space: Stage/Unstage | c: Commit | ?: Help | q: Quit";
 
     let status_bar = Paragraph::new(Line::from(vec![
         Span::raw(&app.message),
@@ -294,20 +274,20 @@ fn render_init_repo_popup(f: &mut Frame) {
     f.render_widget(paragraph, area);
 }
 
-/// Renders the help popup.
+/// Renders the descriptive help popup.
 fn render_help_popup(f: &mut Frame) {
     let text = vec![
         Line::from("").style(Style::default()),
         Line::from(" Global Commands").style(Style::default().bold().underlined()),
         Line::from(vec![Span::styled("  q", Style::default().bold()), Span::raw(": Quit the application.")]),
         Line::from(vec![Span::styled("  ?", Style::default().bold()), Span::raw(": Toggle this help popup.")]),
-        Line::from(vec![Span::styled("  h", Style::default().bold()), Span::raw(": Go to the Home screen.")]),
-        Line::from(vec![Span::styled("  s", Style::default().bold()), Span::raw(": Go to the Status screen.")]),
+        Line::from(vec![Span::styled("  h", Style::default().bold()), Span::raw(": Go to the Home screen (from Status view).")]),
+        Line::from(vec![Span::styled("  s", Style::default().bold()), Span::raw(": Go to the Status screen (from Home view).")]),
         Line::from(""),
         Line::from(" Status Screen Navigation").style(Style::default().bold().underlined()),
         Line::from(vec![Span::styled("  j/k, ↓/↑", Style::default().bold()), Span::raw(": Navigate up and down in the focused panel.")]),
         Line::from(vec![Span::styled("  Tab, l", Style::default().bold()), Span::raw(":  Cycle focus to the next panel (Unstaged -> Staged -> Commands).")]),
-        Line::from(vec![Span::styled("  Shift+Tab, h", Style::default().bold()), Span::raw(": Cycle focus to the previous panel.")]),
+        Line::from(vec![Span::styled("  Shift+Tab", Style::default().bold()), Span::raw(": Cycle focus to the previous panel.")]),
         Line::from(""),
         Line::from(" Status Screen Actions").style(Style::default().bold().underlined()),
         Line::from(vec![Span::styled("  space", Style::default().bold()), Span::raw(": Stage (if in Unstaged) or unstage (if in Staged) the selected file.")]),

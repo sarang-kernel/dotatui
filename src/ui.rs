@@ -7,32 +7,28 @@ use ratatui::{
     widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Wrap},
 };
 
-/// The main drawing function that orchestrates the rendering of all UI components.
 pub fn draw(f: &mut Frame, app: &mut App) {
-    // Render a background block to clear the screen on every frame.
     f.render_widget(Block::default(), f.size());
 
-    // Main router for different views
     match app.mode {
         AppMode::Home => render_home(f, app),
         AppMode::Status => render_status_view(f, app),
-        _ => {} // Popups are handled on top of the current view
+        _ => {}
     }
 
-    // Render popups conditionally over the main UI.
     if let AppMode::Popup(popup_mode) = &app.mode {
         match popup_mode {
             PopupMode::Commit => render_input_popup(f, app, "Commit Message"),
             PopupMode::AddRemote => render_input_popup(f, app, "Input Remote URL"),
             PopupMode::InitRepo => render_init_repo_popup(f),
+            PopupMode::ChangePath => render_input_popup(f, app, "Change Dotfiles Path"),
             PopupMode::Help => render_help_popup(f),
         }
     }
 }
 
-/// Renders the Home screen with the new ASCII art logo.
+// ... (render_home is unchanged from the last version with the new ASCII art) ...
 fn render_home(f: &mut Frame, app: &App) {
-    // ASCII Art Logo
     let logo = vec![
         Line::from(""),
         Line::from("DDDDDDDDDDDDD                                  tttt                                    tttt                              iiii  "),
@@ -77,7 +73,11 @@ fn render_home(f: &mut Frame, app: &App) {
         Line::from(""),
         Line::from(vec![
             Span::styled("[s]", Style::default().fg(Color::Green).bold()),
-            Span::raw(" Status"),
+            Span::raw(" Status View"),
+        ]),
+        Line::from(vec![
+            Span::styled("[c]", Style::default().fg(Color::Green).bold()),
+            Span::raw(" Change Dotfiles Path"),
         ]),
         Line::from(vec![
             Span::styled("[h]", Style::default().fg(Color::Green).bold()),
@@ -93,13 +93,12 @@ fn render_home(f: &mut Frame, app: &App) {
     let status_p = Paragraph::new(status_lines).alignment(Alignment::Center);
     let menu_p = Paragraph::new(menu_lines).alignment(Alignment::Center);
 
-    // Adjust layout constraints to better fit the larger logo
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Percentage(65), // More space for the logo
-            Constraint::Percentage(15), // Less space for status
-            Constraint::Percentage(20), // Space for the menu
+            Constraint::Percentage(65),
+            Constraint::Percentage(15),
+            Constraint::Percentage(20),
         ])
         .split(f.size());
 
@@ -108,7 +107,8 @@ fn render_home(f: &mut Frame, app: &App) {
     f.render_widget(menu_p, chunks[2]);
 }
 
-/// Renders the main three-panel status view.
+
+// MODIFIED: Renders a three-panel layout for Status, Staged, and Diff.
 fn render_status_view(f: &mut Frame, app: &mut App) {
     let main_chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -120,19 +120,19 @@ fn render_status_view(f: &mut Frame, app: &mut App) {
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
         .split(main_chunks[0]);
     
-    let right_chunks = Layout::default()
+    let left_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-        .split(top_chunks[1]);
+        .split(top_chunks[0]);
 
-    render_file_panel(f, app, FocusedPanel::Unstaged, top_chunks[0]);
-    render_file_panel(f, app, FocusedPanel::Staged, right_chunks[0]);
-    render_menu_panel(f, app, right_chunks[1]);
+    render_file_panel(f, app, FocusedPanel::Unstaged, left_chunks[0]);
+    render_file_panel(f, app, FocusedPanel::Staged, left_chunks[1]);
+    render_diff_panel(f, app, top_chunks[1]);
 
     render_status_bar(f, app, main_chunks[1]);
 }
 
-/// Renders a file panel (either Staged or Unstaged).
+// ... (render_file_panel is unchanged) ...
 fn render_file_panel(f: &mut Frame, app: &mut App, panel_type: FocusedPanel, area: Rect) {
     let (title, items, state, is_focused) = match panel_type {
         FocusedPanel::Unstaged => (
@@ -147,7 +147,6 @@ fn render_file_panel(f: &mut Frame, app: &mut App, panel_type: FocusedPanel, are
             &mut app.staged_state,
             app.focused_panel == FocusedPanel::Staged,
         ),
-        _ => return,
     };
 
     let border_style = if is_focused {
@@ -191,38 +190,29 @@ fn render_file_panel(f: &mut Frame, app: &mut App, panel_type: FocusedPanel, are
     f.render_stateful_widget(list, area, state);
 }
 
-/// Renders the command menu panel.
-fn render_menu_panel(f: &mut Frame, app: &mut App, area: Rect) {
-    let is_focused = app.focused_panel == FocusedPanel::Menu;
-    let border_style = if is_focused {
-        Style::default().fg(Color::Cyan)
-    } else {
-        Style::default().fg(Color::DarkGray)
-    };
 
-    let items: Vec<ListItem> = app
-        .menu_items
-        .iter()
-        .map(|item| ListItem::new(item.as_str()))
-        .collect();
+// NEW: Renders the diff panel with colored lines.
+fn render_diff_panel(f: &mut Frame, app: &App, area: Rect) {
+    let lines: Vec<Line> = app.diff_text.lines().map(|line| {
+        let style = match line.chars().next() {
+            Some('+') => Style::default().fg(Color::Green),
+            Some('-') => Style::default().fg(Color::Red),
+            _ => Style::default(),
+        };
+        Line::from(Span::styled(line, style))
+    }).collect();
 
-    let list = List::new(items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title("Commands")
-                .border_style(border_style),
-        )
-        .highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
-        .highlight_symbol(">> ");
+    let paragraph = Paragraph::new(lines)
+        .block(Block::default().borders(Borders::ALL).title("Diff"))
+        .wrap(Wrap { trim: true });
 
-    f.render_stateful_widget(list, area, &mut app.menu_state);
+    f.render_widget(paragraph, area);
 }
 
-/// Renders the status bar at the bottom of the screen.
+// MODIFIED: Updated hints for the new keybinding model.
 fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
     let loading_indicator = if app.is_loading { " [Loading...]" } else { "" };
-    let hints = " | Tab/l: Next Panel | Shift+Tab/h: Prev Panel | space: Stage/Unstage | c: Commit | ?: Help | q: Quit";
+    let hints = "h: Home | ?: Help | q: Quit | Tab: Panels | space: Stage/Unstage | c: Commit | p: Push";
 
     let status_bar = Paragraph::new(Line::from(vec![
         Span::raw(&app.message),
@@ -239,7 +229,7 @@ fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(status_bar, area);
 }
 
-/// Renders a popup for user input.
+// ... (render_input_popup and render_init_repo_popup are unchanged) ...
 fn render_input_popup(f: &mut Frame, app: &App, title: &str) {
     let block = Block::default()
         .title(title)
@@ -254,7 +244,6 @@ fn render_input_popup(f: &mut Frame, app: &App, title: &str) {
     f.set_cursor(area.x + app.input.len() as u16 + 1, area.y + 1);
 }
 
-/// Renders a confirmation popup for initializing a repository.
 fn render_init_repo_popup(f: &mut Frame) {
     let text = vec![
         Line::from(""),
@@ -274,7 +263,8 @@ fn render_init_repo_popup(f: &mut Frame) {
     f.render_widget(paragraph, area);
 }
 
-/// Renders the descriptive help popup.
+
+// MODIFIED: Updated help text for the new keybinding model.
 fn render_help_popup(f: &mut Frame) {
     let text = vec![
         Line::from("").style(Style::default()),
@@ -285,16 +275,16 @@ fn render_help_popup(f: &mut Frame) {
         Line::from(vec![Span::styled("  s", Style::default().bold()), Span::raw(": Go to the Status screen (from Home view).")]),
         Line::from(""),
         Line::from(" Status Screen Navigation").style(Style::default().bold().underlined()),
-        Line::from(vec![Span::styled("  j/k, ↓/↑", Style::default().bold()), Span::raw(": Navigate up and down in the focused panel.")]),
-        Line::from(vec![Span::styled("  Tab, l", Style::default().bold()), Span::raw(":  Cycle focus to the next panel (Unstaged -> Staged -> Commands).")]),
-        Line::from(vec![Span::styled("  Shift+Tab", Style::default().bold()), Span::raw(": Cycle focus to the previous panel.")]),
+        Line::from(vec![Span::styled("  j/k, ↓/↑", Style::default().bold()), Span::raw(": Navigate up and down in file panels.")]),
+        Line::from(vec![Span::styled("  Tab, l", Style::default().bold()), Span::raw(":  Cycle focus between Unstaged and Staged panels.")]),
+        Line::from(vec![Span::styled("  Shift+Tab, h", Style::default().bold()), Span::raw(": Cycle focus to the previous panel.")]),
         Line::from(""),
         Line::from(" Status Screen Actions").style(Style::default().bold().underlined()),
         Line::from(vec![Span::styled("  space", Style::default().bold()), Span::raw(": Stage (if in Unstaged) or unstage (if in Staged) the selected file.")]),
         Line::from(vec![Span::styled("  a", Style::default().bold()), Span::raw(":     Stage all unstaged files.")]),
         Line::from(vec![Span::styled("  u", Style::default().bold()), Span::raw(":     Unstage all staged files.")]),
         Line::from(vec![Span::styled("  c", Style::default().bold()), Span::raw(":     Open the commit message input popup.")]),
-        Line::from(vec![Span::styled("  Enter", Style::default().bold()), Span::raw(": (In Commands panel) Execute the selected command.")]),
+        Line::from(vec![Span::styled("  p", Style::default().bold()), Span::raw(":     Push staged changes to the remote.")]),
         Line::from(vec![Span::styled("  r", Style::default().bold()), Span::raw(":     Manually refresh the Git status.")]),
     ];
     
@@ -310,7 +300,7 @@ fn render_help_popup(f: &mut Frame) {
     f.render_widget(paragraph, area);
 }
 
-/// Helper function to create a centered rectangle for popups.
+// ... (centered_rect is unchanged) ...
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)

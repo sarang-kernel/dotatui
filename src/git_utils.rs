@@ -1,22 +1,9 @@
-// This file is a crucial abstraction layer. It encapsulates all the logic for interacting with the git2 library, providing a clean and simple API to the rest of the application. By isolating this logic, we make the main application code easier to read and test.
-
-//Key features of this file:
-
-//    Safe API: All functions return our custom Result<T>, ensuring that any Git-related failures are properly propagated and handled.
-
-//    Efficiency: It uses native git2 bindings, which are significantly faster and more resource-efficient than shelling out to the git command-line executable.
-
-//    Clarity: It defines simple enums like FileStatus to represent Git states, making the data easier to work with in the UI layer.
-
-//    Authentication: The push function is configured to use the system's SSH agent for authentication, which is a common and secure setup for services like GitHub.
-
 // src/git_utils.rs
 
 use crate::error::Result;
-use git2::{Cred, IndexAddOption, PushOptions, RemoteCallbacks, Repository, Status, StatusOptions};
+use git2::{Cred, DiffOptions, IndexAddOption, PushOptions, RemoteCallbacks, Repository, Status, StatusOptions};
 use std::path::Path;
 
-/// Represents the status of a file in the Git working directory.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FileStatus {
     New,
@@ -27,19 +14,12 @@ pub enum FileStatus {
     Conflicted,
 }
 
-/// A struct to hold information about a single file's status.
 #[derive(Debug, Clone)]
 pub struct StatusItem {
     pub path: String,
     pub status: FileStatus,
 }
 
-/// Retrieves the status of all changed files, separated into unstaged and staged lists.
-///
-/// This is a core function for the panel-based UI.
-///
-/// # Returns
-/// A `Result` containing a tuple of `(unstaged_changes, staged_changes)`.
 pub fn get_status(repo: &Repository) -> Result<(Vec<StatusItem>, Vec<StatusItem>)> {
     let mut opts = StatusOptions::new();
     opts.include_untracked(true).recurse_untracked_dirs(true);
@@ -55,12 +35,10 @@ pub fn get_status(repo: &Repository) -> Result<(Vec<StatusItem>, Vec<StatusItem>
         };
         let status = entry.status();
 
-        // Unstaged changes are those in the Working Directory.
         if let Some(file_status) = status_to_file_status(status, false) {
             unstaged.push(StatusItem { path: path.clone(), status: file_status });
         }
 
-        // Staged changes are those in the Index.
         if let Some(file_status) = status_to_file_status(status, true) {
             staged.push(StatusItem { path, status: file_status });
         }
@@ -68,7 +46,6 @@ pub fn get_status(repo: &Repository) -> Result<(Vec<StatusItem>, Vec<StatusItem>
     Ok((unstaged, staged))
 }
 
-/// Helper to convert a detailed `git2::Status` into our simplified `FileStatus`.
 fn status_to_file_status(status: Status, is_staged: bool) -> Option<FileStatus> {
     if is_staged {
         match status {
@@ -92,7 +69,41 @@ fn status_to_file_status(status: Status, is_staged: bool) -> Option<FileStatus> 
     }
 }
 
-/// Stages a single file by its path.
+pub fn get_file_diff(repo: &Repository, file_path: &str, is_staged: bool) -> Result<String> {
+    let mut opts = DiffOptions::new();
+    opts.pathspec(file_path);
+    opts.context_lines(3);
+
+    let diff = if is_staged {
+        let head_tree = repo.head()?.peel_to_tree()?;
+        repo.diff_tree_to_index(Some(&head_tree), None, Some(&mut opts))?
+    } else {
+        repo.diff_index_to_workdir(None, Some(&mut opts))?
+    };
+
+    let mut diff_text = String::new();
+    diff.foreach(
+        &mut |_, _| true,
+        None,
+        None,
+        // CORRECTED: Prefixed unused variables with an underscore.
+        Some(&mut |_delta, _hunk, line| {
+            let (prefix, content) = match line.origin() {
+                '+' | '-' | ' ' => (line.origin().to_string(), String::from_utf8_lossy(line.content()).to_string()),
+                _ => ("".to_string(), "".to_string()),
+            };
+            diff_text.push_str(&format!("{} {}", prefix, content));
+            true
+        }),
+    )?;
+
+    if diff_text.is_empty() {
+        Ok("No changes to display.".to_string())
+    } else {
+        Ok(diff_text)
+    }
+}
+
 pub fn stage_file(repo: &Repository, path: &str) -> Result<()> {
     let mut index = repo.index()?;
     index.add_path(Path::new(path))?;
@@ -100,14 +111,12 @@ pub fn stage_file(repo: &Repository, path: &str) -> Result<()> {
     Ok(())
 }
 
-/// Unstages a single file by its path.
 pub fn unstage_file(repo: &Repository, path: &str) -> Result<()> {
     let head = repo.head()?.peel_to_commit()?;
     repo.reset_default(Some(head.as_object()), &[path])?;
     Ok(())
 }
 
-/// Stages all changes in the working directory.
 pub fn stage_all(repo: &Repository) -> Result<()> {
     let mut index = repo.index()?;
     index.add_all(["*"].iter(), IndexAddOption::DEFAULT, None)?;
@@ -115,14 +124,12 @@ pub fn stage_all(repo: &Repository) -> Result<()> {
     Ok(())
 }
 
-/// Unstages all changes in the index.
 pub fn unstage_all(repo: &Repository) -> Result<()> {
     let head = repo.head()?.peel_to_commit()?;
     repo.reset_default(Some(head.as_object()), ["*"])?;
     Ok(())
 }
 
-/// Commits the currently staged changes.
 pub fn commit(repo: &Repository, message: &str) -> Result<()> {
     let signature = repo.signature()?;
     let mut index = repo.index()?;
@@ -141,13 +148,11 @@ pub fn commit(repo: &Repository, message: &str) -> Result<()> {
     Ok(())
 }
 
-/// Finds the most recent commit on the current HEAD.
 fn find_last_commit(repo: &Repository) -> Result<git2::Commit> {
     let obj = repo.head()?.resolve()?.peel(git2::ObjectType::Commit)?;
     Ok(obj.into_commit().unwrap())
 }
 
-/// Pushes the current branch to the 'origin' remote.
 pub fn push(repo: &Repository) -> Result<()> {
     let mut remote = repo.find_remote("origin")?;
     let mut callbacks = RemoteCallbacks::new();
@@ -164,18 +169,15 @@ pub fn push(repo: &Repository) -> Result<()> {
     Ok(())
 }
 
-/// Adds a remote named 'origin' to the repository.
 pub fn add_remote(repo: &Repository, url: &str) -> Result<()> {
     repo.remote("origin", url)?;
     Ok(())
 }
 
-/// Checks if a remote named 'origin' already exists.
 pub fn has_remote(repo: &Repository) -> bool {
     repo.find_remote("origin").is_ok()
 }
 
-/// Initializes a new Git repository in the specified path.
 pub fn init_repo(path: &Path) -> Result<Repository> {
     Ok(Repository::init(path)?)
 }

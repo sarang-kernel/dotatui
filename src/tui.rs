@@ -14,7 +14,6 @@ use std::io::{self, Stderr};
 use std::time::Duration;
 use tokio::sync::mpsc;
 
-/// A struct that handles the terminal user interface lifecycle.
 pub struct Tui {
     terminal: Terminal<CrosstermBackend<Stderr>>,
 }
@@ -37,7 +36,6 @@ impl Tui {
         Ok(())
     }
 
-    /// Runs a special, minimal event loop to get the dotfiles path from the user.
     pub fn run_setup_prompt(&mut self) -> Result<String> {
         let mut path_input = String::new();
         loop {
@@ -61,6 +59,7 @@ impl Tui {
             if event::poll(Duration::from_millis(250))? {
                 if let Event::Key(key) = event::read()? {
                     if key.kind == KeyEventKind::Press {
+                        // CORRECTED: Reordered patterns to make Ctrl-C reachable.
                         match key.code {
                             KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
                                 return Err(error::Error::Io(io::Error::new(
@@ -79,9 +78,8 @@ impl Tui {
                             KeyCode::Backspace => {
                                 path_input.pop();
                             }
+                            _ => {}
                         }
-                        _ => {}
-                        
                     }
                 }
             }
@@ -113,7 +111,7 @@ impl Tui {
     ) -> Result<()> {
         let action = match app.mode {
             AppMode::Home => self.handle_home_mode_key(key),
-            AppMode::Status => self.handle_status_mode_key(key, app),
+            AppMode::Status => self.handle_status_mode_key(key),
             AppMode::Popup(_) => self.handle_popup_mode_key(key, app),
         };
 
@@ -128,33 +126,28 @@ impl Tui {
         match key.code {
             KeyCode::Char('q') => Some(Action::Quit),
             KeyCode::Char('s') => Some(Action::GoToStatus),
+            KeyCode::Char('c') => Some(Action::EnterPopup(PopupMode::ChangePath)),
             KeyCode::Char('h') | KeyCode::Char('?') => Some(Action::ToggleHelp),
             _ => None,
         }
     }
 
-    fn handle_status_mode_key(&self, key: KeyEvent, app: &App) -> Option<Action> {
+    fn handle_status_mode_key(&self, key: KeyEvent) -> Option<Action> {
         match key.code {
             KeyCode::Char('q') => Some(Action::Quit),
             KeyCode::Char('?') => Some(Action::ToggleHelp),
             KeyCode::Char('h') => Some(Action::GoToHome),
             KeyCode::Char('j') | KeyCode::Down => Some(Action::NavigateDown),
             KeyCode::Char('k') | KeyCode::Up => Some(Action::NavigateUp),
-            KeyCode::Char('l') | KeyCode::Tab => Some(Action::FocusNextPanel),
+            KeyCode::Char('l') | KeyCode::Right | KeyCode::Tab => Some(Action::FocusNextPanel),
+            // CORRECTED: `h` is no longer an alias for previous panel, only BackTab is.
             KeyCode::BackTab => Some(Action::FocusPrevPanel),
             KeyCode::Char('r') => Some(Action::RefreshStatus),
             KeyCode::Char('a') => Some(Action::StageAll),
             KeyCode::Char('u') => Some(Action::UnstageAll),
             KeyCode::Char('c') => Some(Action::EnterPopup(PopupMode::Commit)),
-            KeyCode::Char(' ') => match app.focused_panel {
-                FocusedPanel::Unstaged => Some(Action::StageFile),
-                FocusedPanel::Staged => Some(Action::UnstageFile),
-                _ => None,
-            },
-            KeyCode::Enter => match app.focused_panel {
-                FocusedPanel::Menu => Some(Action::ExecuteCommand),
-                _ => None,
-            },
+            KeyCode::Char('p') => Some(Action::Push),
+            KeyCode::Char(' ') => Some(Action::StageFile),
             _ => None,
         }
     }
@@ -166,6 +159,7 @@ impl Tui {
                 AppMode::Popup(PopupMode::Commit) => Some(Action::Commit),
                 AppMode::Popup(PopupMode::AddRemote) => Some(Action::AddRemote),
                 AppMode::Popup(PopupMode::InitRepo) => Some(Action::InitRepo),
+                AppMode::Popup(PopupMode::ChangePath) => Some(Action::ChangePath),
                 _ => None,
             },
             KeyCode::Char(c) => Some(Action::Input(c)),

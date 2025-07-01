@@ -7,11 +7,12 @@ mod git_utils;
 mod tui;
 mod ui;
 
-use crate::app::{Action, App, PopupMode};
+use crate::app::{Action, App, FocusedPanel, PopupMode};
 use crate::config::Config;
 use crate::error::Result;
 use crate::tui::Tui;
 use git2::Repository;
+use std::io;
 use std::path::PathBuf;
 use tokio::sync::mpsc::{self, UnboundedReceiver};
 
@@ -20,7 +21,6 @@ async fn main() -> anyhow::Result<()> {
     let mut config = Config::load()?;
     let mut tui = Tui::new()?;
 
-    // If the config path is not set, run a special setup TUI.
     if config.dotfiles_path.is_none() {
         tui.enter()?;
         let path_str = tui.run_setup_prompt()?;
@@ -29,11 +29,11 @@ async fn main() -> anyhow::Result<()> {
         tui.exit()?;
     }
 
-    let dotfiles_path = config.dotfiles_path.clone().unwrap();
+    let mut dotfiles_path = config.dotfiles_path.clone().unwrap();
     let (action_tx, mut action_rx) = mpsc::unbounded_channel();
     let mut app = App::new(action_tx, dotfiles_path.clone());
 
-    if let Err(e) = run_app(&mut app, &mut tui, &mut action_rx, &mut config, &dotfiles_path).await {
+    if let Err(e) = run_app(&mut app, &mut tui, &mut action_rx, &mut config, &mut dotfiles_path).await {
         tui.exit()?;
         eprintln!("FATAL ERROR: {}", e);
         std::process::exit(1);
@@ -47,11 +47,11 @@ async fn run_app(
     tui: &mut Tui,
     action_rx: &mut UnboundedReceiver<Action>,
     config: &mut Config,
-    dotfiles_path: &PathBuf,
+    dotfiles_path: &mut PathBuf,
 ) -> Result<()> {
     tui.enter()?;
 
-    if Repository::open(dotfiles_path).is_ok() {
+    if Repository::open(&*dotfiles_path).is_ok() {
         app.send_action(Action::RefreshStatus)?;
     } else {
         app.is_loading = false;
@@ -79,13 +79,47 @@ async fn run_app(
     Ok(())
 }
 
+fn refresh_diff(app: &App, dotfiles_path: &PathBuf) {
+    let selected_file = match app.focused_panel {
+        FocusedPanel::Unstaged => app.get_selected_unstaged_file(),
+        FocusedPanel::Staged => app.get_selected_staged_file(),
+    };
+
+    let diff_text = if let Some(file) = selected_file {
+        let tx = app.action_tx.clone();
+        let path = dotfiles_path.clone();
+        let file_path = file.path.clone();
+        let is_staged = app.focused_panel == FocusedPanel::Staged;
+
+        tokio::spawn(async move {
+            if let Ok(repo) = Repository::open(path) {
+                let diff = git_utils::get_file_diff(&repo, &file_path, is_staged)
+                    .unwrap_or_else(|e| e.to_string());
+                tx.send(Action::DiffUpdated(diff)).unwrap_or_default();
+            }
+        });
+        "Loading diff...".to_string()
+    } else {
+        "No file selected.".to_string()
+    };
+
+    app.action_tx.send(Action::DiffUpdated(diff_text)).unwrap_or_default();
+}
+
 async fn handle_action(
     action: &Action,
     app: &mut App,
     config: &mut Config,
-    dotfiles_path: &PathBuf,
+    dotfiles_path: &mut PathBuf,
 ) -> Result<()> {
     app.update(action)?;
+
+    match action {
+        Action::NavigateUp | Action::NavigateDown | Action::FocusNextPanel | Action::FocusPrevPanel | Action::StatusUpdated(_) => {
+            refresh_diff(app, dotfiles_path);
+        }
+        _ => {}
+    }
 
     match action {
         Action::RefreshStatus => {
@@ -114,6 +148,18 @@ async fn handle_action(
                     app.send_action(Action::GoToHome)?;
                     app.send_action(Action::RefreshStatus)?;
                 }
+            }
+        }
+        Action::ChangePath => {
+            if !app.input.is_empty() {
+                let new_path = PathBuf::from(app.input.clone());
+                config.dotfiles_path = Some(new_path.clone());
+                config.save()?;
+                *dotfiles_path = new_path;
+                app.dotfiles_path = dotfiles_path.clone();
+                app.send_action(Action::ExitPopup)?;
+                app.send_action(Action::GoToHome)?;
+                app.send_action(Action::RefreshStatus)?;
             }
         }
         Action::StageFile => {
@@ -170,19 +216,6 @@ async fn handle_action(
                 })();
                 tx.send(Action::PushCompleted(result)).unwrap_or_default();
             });
-        }
-        Action::ExecuteCommand => {
-            if let Some(index) = app.menu_state.selected() {
-                match app.menu_items.get(index).map(|s| s.as_str()) {
-                    Some("Commit") => app.send_action(Action::EnterPopup(PopupMode::Commit))?,
-                    Some("Push") => app.send_action(Action::Push)?,
-                    Some("Stage All") => app.send_action(Action::StageAll)?,
-                    Some("Unstage All") => app.send_action(Action::UnstageAll)?,
-                    Some("Refresh") => app.send_action(Action::RefreshStatus)?,
-                    Some("Init Repo") => app.send_action(Action::EnterPopup(PopupMode::InitRepo))?,
-                    _ => {}
-                }
-            }
         }
         _ => {}
     }

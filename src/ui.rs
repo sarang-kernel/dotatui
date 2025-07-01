@@ -37,7 +37,13 @@ pub fn draw(f: &mut Frame, app: &mut App) {
         .direction(Direction::Vertical)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
         .split(top_chunks[1]);
-
+    
+    // Main router for different views
+    match app.mode {
+        AppMode::Home => render_home(f, app),
+        AppMode::Status => render_status_view(f, app),
+        _ => {} // Popups are handled seperately
+    }
     // Render the three main panels.
     render_file_panel(f, app, FocusedPanel::Unstaged, top_chunks[0]);
     render_file_panel(f, app, FocusedPanel::Staged, right_chunks[0]);
@@ -55,6 +61,95 @@ pub fn draw(f: &mut Frame, app: &mut App) {
             PopupMode::Help => render_help_popup(f),
         }
     }
+}
+
+// Corrected code
+fn render_home(f: &mut Frame, app: &App) {
+    let logo = vec![
+        Line::from(""),
+        Line::from("  ____            _   _   _ "),
+        Line::from(" |  _ \\   ___  __| | | |_| |"),
+        Line::from(" | | | | / _ \\/ _` | | __| |"),
+        Line::from(" | |_| ||  __/ (_| | | |_| |"),
+        Line::from(" |____/  \\___|\\__,_|  \\__|_|"),
+        Line::from(""),
+    ];
+
+    let status_lines = vec![
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("Managing: ", Style::default().bold()),
+            Span::styled(
+                app.dotfiles_path.to_string_lossy(),
+                Style::default().fg(Color::Cyan),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("Status:   ", Style::default().bold()),
+            Span::raw(if app.is_loading {
+                "Loading..."
+            } else {
+                &app.repo_status_summary
+            }),
+        ]),
+    ];
+
+    let menu_lines = vec![
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("[s]", Style::default().fg(Color::Green).bold()), // Corrected: Style
+            Span::raw(" Status"),
+        ]),
+        Line::from(vec![
+            Span::styled("[h]", Style::default().fg(Color::Green).bold()), // Corrected: Style
+            Span::raw(" Help"),
+        ]),
+        Line::from(vec![
+            Span::styled("[q]", Style::default().fg(Color::Green).bold()), // Corrected: Style
+            Span::raw(" Quit"),
+        ]),
+    ];
+
+    let logo_p = Paragraph::new(logo).alignment(Alignment::Center);
+    let status_p = Paragraph::new(status_lines).alignment(Alignment::Center);
+    let menu_p = Paragraph::new(menu_lines).alignment(Alignment::Center); // Corrected: menu_lines
+
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(40),
+            Constraint::Percentage(20),
+            Constraint::Percentage(40),
+        ])
+        .split(f.size());
+
+    f.render_widget(logo_p, chunks[0]); // Corrected: render_widget
+    f.render_widget(status_p, chunks[1]);
+    f.render_widget(menu_p, chunks[2]);
+}
+
+/// Renders the main three-panel status view.
+fn render_status_view(f: &mut Frame, app: &mut App){
+    let main_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Min(0), Constraint::Length(3)].as_ref())
+        .split(f.size());
+
+    let top_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .split(main_chunks[0]);
+
+    let right_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .split(top_chunks[1]);
+
+    render_file_panel(f, app, FocusedPanel::Unstaged, top_chunks[0]);
+    render_file_panel(f, app, FocusedPanel::Staged, right_chunks[0]);
+    render_menu_panel(f, app, right_chunks[1]);
+
+    render_status_bar(f, app, main_chunks[1]);
 }
 
 /// Renders a file panel (either Staged or Unstaged).
@@ -202,17 +297,25 @@ fn render_init_repo_popup(f: &mut Frame) {
 /// Renders the help popup.
 fn render_help_popup(f: &mut Frame) {
     let text = vec![
-        Line::from(vec![Span::styled("q", Style::default().bold()), Span::raw(": Quit")]),
-        Line::from(vec![Span::styled("j/k/↓/↑", Style::default().bold()), Span::raw(": Navigate lists")]),
-        Line::from(vec![Span::styled("Tab/h/l", Style::default().bold()), Span::raw(": Cycle focus between panels")]),
-        Line::from(vec![Span::styled("space", Style::default().bold()), Span::raw(": Stage/unstage selected file")]),
-        Line::from(vec![Span::styled("a", Style::default().bold()), Span::raw(": Stage all unstaged files")]),
-        Line::from(vec![Span::styled("u", Style::default().bold()), Span::raw(": Unstage all staged files")]),
-        Line::from(vec![Span::styled("c", Style::default().bold()), Span::raw(": Open commit message input")]),
-        Line::from(vec![Span::styled("Enter", Style::default().bold()), Span::raw(": (In Commands panel) Execute selected command")]),
-        Line::from(vec![Span::styled("r", Style::default().bold()), Span::raw(": Refresh status")]),
-        Line::from(vec![Span::styled("?", Style::default().bold()), Span::raw(": Toggle this help screen")]),
-        Line::from(vec![Span::styled("Esc", Style::default().bold()), Span::raw(": Close any popup")]),
+        Line::from("").style(Style::default()),
+        Line::from(" Global Commands").style(Style::default().bold().underlined()),
+        Line::from(vec![Span::styled("  q", Style::default().bold()), Span::raw(": Quit the application.")]),
+        Line::from(vec![Span::styled("  ?", Style::default().bold()), Span::raw(": Toggle this help popup.")]),
+        Line::from(vec![Span::styled("  h", Style::default().bold()), Span::raw(": Go to the Home screen.")]),
+        Line::from(vec![Span::styled("  s", Style::default().bold()), Span::raw(": Go to the Status screen.")]),
+        Line::from(""),
+        Line::from(" Status Screen Navigation").style(Style::default().bold().underlined()),
+        Line::from(vec![Span::styled("  j/k, ↓/↑", Style::default().bold()), Span::raw(": Navigate up and down in the focused panel.")]),
+        Line::from(vec![Span::styled("  Tab, l", Style::default().bold()), Span::raw(":  Cycle focus to the next panel (Unstaged -> Staged -> Commands).")]),
+        Line::from(vec![Span::styled("  Shift+Tab, h", Style::default().bold()), Span::raw(": Cycle focus to the previous panel.")]),
+        Line::from(""),
+        Line::from(" Status Screen Actions").style(Style::default().bold().underlined()),
+        Line::from(vec![Span::styled("  space", Style::default().bold()), Span::raw(": Stage (if in Unstaged) or unstage (if in Staged) the selected file.")]),
+        Line::from(vec![Span::styled("  a", Style::default().bold()), Span::raw(":     Stage all unstaged files.")]),
+        Line::from(vec![Span::styled("  u", Style::default().bold()), Span::raw(":     Unstage all staged files.")]),
+        Line::from(vec![Span::styled("  c", Style::default().bold()), Span::raw(":     Open the commit message input popup.")]),
+        Line::from(vec![Span::styled("  Enter", Style::default().bold()), Span::raw(": (In Commands panel) Execute the selected command.")]),
+        Line::from(vec![Span::styled("  r", Style::default().bold()), Span::raw(":     Manually refresh the Git status.")]),
     ];
     
     let block = Block::default()
@@ -220,7 +323,7 @@ fn render_help_popup(f: &mut Frame) {
         .borders(Borders::ALL)
         .title_bottom(Line::from(" Press ? or Esc to close ").centered());
         
-    let area = centered_rect(60, 60, f.size());
+    let area = centered_rect(80, 80, f.size());
     let paragraph = Paragraph::new(text).block(block).wrap(Wrap { trim: true });
 
     f.render_widget(Clear, area);

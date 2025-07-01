@@ -7,12 +7,11 @@ mod git_utils;
 mod tui;
 mod ui;
 
-use crate::app::{Action, App, FocusedPanel, PopupMode};
+use crate::app::{Action, App, PopupMode};
 use crate::config::Config;
 use crate::error::Result;
 use crate::tui::Tui;
 use git2::Repository;
-use std::io;
 use std::path::PathBuf;
 use tokio::sync::mpsc::{self, UnboundedReceiver};
 
@@ -21,6 +20,7 @@ async fn main() -> anyhow::Result<()> {
     let mut config = Config::load()?;
     let mut tui = Tui::new()?;
 
+    // If the config path is not set, run a special setup TUI.
     if config.dotfiles_path.is_none() {
         tui.enter()?;
         let path_str = tui.run_setup_prompt()?;
@@ -33,6 +33,7 @@ async fn main() -> anyhow::Result<()> {
     let (action_tx, mut action_rx) = mpsc::unbounded_channel();
     let mut app = App::new(action_tx, dotfiles_path.clone());
 
+    // Run the main application loop.
     if let Err(e) = run_app(&mut app, &mut tui, &mut action_rx, &mut config, &mut dotfiles_path).await {
         tui.exit()?;
         eprintln!("FATAL ERROR: {}", e);
@@ -42,6 +43,7 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// The core application loop.
 async fn run_app(
     app: &mut App,
     tui: &mut Tui,
@@ -51,14 +53,15 @@ async fn run_app(
 ) -> Result<()> {
     tui.enter()?;
 
+    // On startup, immediately check the repo and refresh the status.
     if Repository::open(&*dotfiles_path).is_ok() {
         app.send_action(Action::RefreshStatus)?;
     } else {
         app.is_loading = false;
-        app.repo_status_summary = "Not a Git repository.".to_string();
-        app.message = "Use 'Init Repo' command or '?' for help.".to_string();
+        app.message = "Not a Git repository. Press '?' for help.".to_string();
     }
 
+    // --- Main Loop ---
     while !app.should_quit {
         tui.draw(app)?;
 
@@ -79,21 +82,16 @@ async fn run_app(
     Ok(())
 }
 
+/// A helper function to spawn a task that generates and sends a diff.
 fn refresh_diff(app: &App, dotfiles_path: &PathBuf) {
-    let selected_file = match app.focused_panel {
-        FocusedPanel::Unstaged => app.get_selected_unstaged_file(),
-        FocusedPanel::Staged => app.get_selected_staged_file(),
-    };
-
-    let diff_text = if let Some(file) = selected_file {
+    let diff_text = if let Some(file) = app.get_selected_file() {
         let tx = app.action_tx.clone();
         let path = dotfiles_path.clone();
-        let file_path = file.path.clone();
-        let is_staged = app.focused_panel == FocusedPanel::Staged;
+        let file_state = file.clone();
 
         tokio::spawn(async move {
             if let Ok(repo) = Repository::open(path) {
-                let diff = git_utils::get_file_diff(&repo, &file_path, is_staged)
+                let diff = git_utils::get_file_diff(&repo, &file_state)
                     .unwrap_or_else(|e| e.to_string());
                 tx.send(Action::DiffUpdated(diff)).unwrap_or_default();
             }
@@ -103,24 +101,29 @@ fn refresh_diff(app: &App, dotfiles_path: &PathBuf) {
         "No file selected.".to_string()
     };
 
+    // Send an immediate update to show "Loading..." or "No file selected."
     app.action_tx.send(Action::DiffUpdated(diff_text)).unwrap_or_default();
 }
 
+/// Handles actions with side effects.
 async fn handle_action(
     action: &Action,
     app: &mut App,
     config: &mut Config,
     dotfiles_path: &mut PathBuf,
 ) -> Result<()> {
+    // First, update the app's internal state based on the action.
     app.update(action)?;
 
+    // After any state change that could affect the diff, refresh it.
     match action {
-        Action::NavigateUp | Action::NavigateDown | Action::FocusNextPanel | Action::FocusPrevPanel | Action::StatusUpdated(_) => {
+        Action::NavigateUp | Action::NavigateDown | Action::StatusUpdated(_) => {
             refresh_diff(app, dotfiles_path);
         }
         _ => {}
     }
 
+    // Then, perform any side effects (like Git operations).
     match action {
         Action::RefreshStatus => {
             let tx = app.action_tx.clone();
@@ -145,7 +148,6 @@ async fn handle_action(
                     config.remote_url = Some(app.input.clone());
                     config.save()?;
                     app.send_action(Action::ExitPopup)?;
-                    app.send_action(Action::GoToHome)?;
                     app.send_action(Action::RefreshStatus)?;
                 }
             }
@@ -158,22 +160,17 @@ async fn handle_action(
                 *dotfiles_path = new_path;
                 app.dotfiles_path = dotfiles_path.clone();
                 app.send_action(Action::ExitPopup)?;
-                app.send_action(Action::GoToHome)?;
                 app.send_action(Action::RefreshStatus)?;
             }
         }
-        Action::StageFile => {
-            if let Some(file) = app.get_selected_unstaged_file() {
+        Action::StageUnstage => {
+            if let Some(file) = app.get_selected_file() {
                 if let Ok(repo) = Repository::open(dotfiles_path) {
-                    git_utils::stage_file(&repo, &file.path)?;
-                    app.send_action(Action::RefreshStatus)?;
-                }
-            }
-        }
-        Action::UnstageFile => {
-            if let Some(file) = app.get_selected_staged_file() {
-                if let Ok(repo) = Repository::open(dotfiles_path) {
-                    git_utils::unstage_file(&repo, &file.path)?;
+                    if file.staging_status == git_utils::StagingStatus::Staged {
+                        git_utils::unstage_file(&repo, &file.path)?;
+                    } else {
+                        git_utils::stage_file(&repo, &file.path)?;
+                    }
                     app.send_action(Action::RefreshStatus)?;
                 }
             }
@@ -181,12 +178,6 @@ async fn handle_action(
         Action::StageAll => {
             if let Ok(repo) = Repository::open(dotfiles_path) {
                 git_utils::stage_all(&repo)?;
-                app.send_action(Action::RefreshStatus)?;
-            }
-        }
-        Action::UnstageAll => {
-            if let Ok(repo) = Repository::open(dotfiles_path) {
-                git_utils::unstage_all(&repo)?;
                 app.send_action(Action::RefreshStatus)?;
             }
         }

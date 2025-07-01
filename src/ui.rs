@@ -1,21 +1,31 @@
 // src/ui.rs
 
-use crate::app::{App, AppMode, FocusedPanel, PopupMode};
-use crate::git_utils::FileStatus;
+use crate::app::{App, AppMode, PopupMode};
+use crate::git_utils::{FileState, FileStatus, StagingStatus};
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Wrap},
 };
 
+/// The main drawing function that orchestrates the rendering of all UI components.
 pub fn draw(f: &mut Frame, app: &mut App) {
-    f.render_widget(Block::default(), f.size());
+    // Create a main layout with two chunks: one for the main content and one for the status bar.
+    let main_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Min(0), Constraint::Length(1)].as_ref())
+        .split(f.size());
 
-    match app.mode {
-        AppMode::Home => render_home(f, app),
-        AppMode::Status => render_status_view(f, app),
-        _ => {}
-    }
+    // Split the main content area into two panels: Files and Diff.
+    let top_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(40), Constraint::Percentage(60)].as_ref())
+        .split(main_chunks[0]);
 
+    render_file_panel(f, app, top_chunks[0]);
+    render_diff_panel(f, app, top_chunks[1]);
+    render_status_bar(f, app, main_chunks[1]);
+
+    // Render popups on top of the main UI if the app is in a popup mode.
     if let AppMode::Popup(popup_mode) = &app.mode {
         match popup_mode {
             PopupMode::Commit => render_input_popup(f, app, "Commit Message"),
@@ -27,153 +37,35 @@ pub fn draw(f: &mut Frame, app: &mut App) {
     }
 }
 
-// ... (render_home is unchanged from the last version with the new ASCII art) ...
-fn render_home(f: &mut Frame, app: &App) {
-    let logo = vec![
-        Line::from(""),
-        Line::from("DDDDDDDDDDDDD                                  tttt                                    tttt                              iiii  "),
-        Line::from("D::::::::::::DDD                            ttt:::t                                 ttt:::t                             i::::i "),
-        Line::from("D:::::::::::::::DD                          t:::::t                                 t:::::t                              iiii  "),
-        Line::from("DDD:::::DDDDD:::::D                         t:::::t                                 t:::::t                                    "),
-        Line::from("  D:::::D    D:::::D    ooooooooooo   ttttttt:::::ttttttt      aaaaaaaaaaaaa  ttttttt:::::ttttttt    uuuuuu    uuuuuu  iiiiiii "),
-        Line::from("  D:::::D     D:::::D oo:::::::::::oo t:::::::::::::::::t      a::::::::::::a t:::::::::::::::::t    u::::u    u::::u  i:::::i "),
-        Line::from("  D:::::D     D:::::Do:::::::::::::::ot:::::::::::::::::t      aaaaaaaaa:::::at:::::::::::::::::t    u::::u    u::::u   i::::i "),
-        Line::from("  D:::::D     D:::::Do:::::ooooo:::::otttttt:::::::tttttt               a::::atttttt:::::::tttttt    u::::u    u::::u   i::::i "),
-        Line::from("  D:::::D     D:::::Do::::o     o::::o      t:::::t              aaaaaaa:::::a      t:::::t          u::::u    u::::u   i::::i "),
-        Line::from("  D:::::D     D:::::Do::::o     o::::o      t:::::t            aa::::::::::::a      t:::::t          u::::u    u::::u   i::::i "),
-        Line::from("  D:::::D     D:::::Do::::o     o::::o      t:::::t           a::::aaaa::::::a      t:::::t          u::::u    u::::u   i::::i "),
-        Line::from("  D:::::D    D:::::D o::::o     o::::o      t:::::t    tttttta::::a    a:::::a      t:::::t    ttttttu:::::uuuu:::::u   i::::i "),
-        Line::from("DDD:::::DDDDD:::::D  o:::::ooooo:::::o      t::::::tttt:::::ta::::a    a:::::a      t::::::tttt:::::tu:::::::::::::::uui::::::i"),
-        Line::from("D:::::::::::::::DD   o:::::::::::::::o      tt::::::::::::::ta:::::aaaa::::::a      tt::::::::::::::t u:::::::::::::::ui::::::i"),
-        Line::from("D::::::::::::DDD      oo:::::::::::oo         tt:::::::::::tt a::::::::::aa:::a       tt:::::::::::tt  uu::::::::uu:::ui::::::i"),
-        Line::from("DDDDDDDDDDDDD           ooooooooooo             ttttttttttt    aaaaaaaaaa  aaaa         ttttttttttt      uuuuuuuu  uuuuiiiiiiii"),
-        Line::from(""),
-    ];
-
-    let status_lines = vec![
-        Line::from(""),
-        Line::from(vec![
-            Span::styled("Managing: ", Style::default().bold()),
-            Span::styled(
-                app.dotfiles_path.to_string_lossy(),
-                Style::default().fg(Color::Cyan),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled("Status:   ", Style::default().bold()),
-            Span::raw(if app.is_loading {
-                "Loading..."
-            } else {
-                &app.repo_status_summary
-            }),
-        ]),
-    ];
-
-    let menu_lines = vec![
-        Line::from(""),
-        Line::from(vec![
-            Span::styled("[s]", Style::default().fg(Color::Green).bold()),
-            Span::raw(" Status View"),
-        ]),
-        Line::from(vec![
-            Span::styled("[c]", Style::default().fg(Color::Green).bold()),
-            Span::raw(" Change Dotfiles Path"),
-        ]),
-        Line::from(vec![
-            Span::styled("[h]", Style::default().fg(Color::Green).bold()),
-            Span::raw(" Help"),
-        ]),
-        Line::from(vec![
-            Span::styled("[q]", Style::default().fg(Color::Green).bold()),
-            Span::raw(" Quit"),
-        ]),
-    ];
-
-    let logo_p = Paragraph::new(logo).alignment(Alignment::Center);
-    let status_p = Paragraph::new(status_lines).alignment(Alignment::Center);
-    let menu_p = Paragraph::new(menu_lines).alignment(Alignment::Center);
-
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage(65),
-            Constraint::Percentage(15),
-            Constraint::Percentage(20),
-        ])
-        .split(f.size());
-
-    f.render_widget(logo_p, chunks[0]);
-    f.render_widget(status_p, chunks[1]);
-    f.render_widget(menu_p, chunks[2]);
-}
-
-
-// MODIFIED: Renders a three-panel layout for Status, Staged, and Diff.
-fn render_status_view(f: &mut Frame, app: &mut App) {
-    let main_chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Min(0), Constraint::Length(3)].as_ref())
-        .split(f.size());
-
-    let top_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-        .split(main_chunks[0]);
-    
-    let left_chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-        .split(top_chunks[0]);
-
-    render_file_panel(f, app, FocusedPanel::Unstaged, left_chunks[0]);
-    render_file_panel(f, app, FocusedPanel::Staged, left_chunks[1]);
-    render_diff_panel(f, app, top_chunks[1]);
-
-    render_status_bar(f, app, main_chunks[1]);
-}
-
-// ... (render_file_panel is unchanged) ...
-fn render_file_panel(f: &mut Frame, app: &mut App, panel_type: FocusedPanel, area: Rect) {
-    let (title, items, state, is_focused) = match panel_type {
-        FocusedPanel::Unstaged => (
-            format!("Unstaged ({})", app.unstaged_changes.len()),
-            &app.unstaged_changes,
-            &mut app.unstaged_state,
-            app.focused_panel == FocusedPanel::Unstaged,
-        ),
-        FocusedPanel::Staged => (
-            format!("Staged ({})", app.staged_changes.len()),
-            &app.staged_changes,
-            &mut app.staged_state,
-            app.focused_panel == FocusedPanel::Staged,
-        ),
-    };
-
-    let border_style = if is_focused {
-        Style::default().fg(Color::Cyan)
-    } else {
-        Style::default().fg(Color::DarkGray)
-    };
-
-    let list_items: Vec<ListItem> = items
+/// Renders the unified file list panel.
+fn render_file_panel(f: &mut Frame, app: &mut App, area: Rect) {
+    let list_items: Vec<ListItem> = app
+        .files
         .iter()
-        .map(|item| {
-            let style = match item.status {
-                FileStatus::New => Style::default().fg(Color::Green),
-                FileStatus::Modified => Style::default().fg(Color::Yellow),
-                FileStatus::Deleted => Style::default().fg(Color::Red),
-                _ => Style::default(),
+        .map(|file| {
+            let (status_char, status_style) = match file.status {
+                FileStatus::New => ("A", Style::default().fg(Color::Green)),
+                FileStatus::Modified => ("M", Style::default().fg(Color::Yellow)),
+                FileStatus::Deleted => ("D", Style::default().fg(Color::Red)),
+                FileStatus::Renamed => ("R", Style::default().fg(Color::Cyan)),
+                FileStatus::Typechange => ("T", Style::default().fg(Color::Magenta)),
+                FileStatus::Conflicted => ("C", Style::default().fg(Color::LightRed)),
             };
-            let prefix = match item.status {
-                FileStatus::New => "A ",
-                FileStatus::Modified => "M ",
-                FileStatus::Deleted => "D ",
-                _ => "  ",
+
+            let (staging_char, staging_style) = match file.staging_status {
+                StagingStatus::Staged => ("S", Style::default().fg(Color::Green)),
+                StagingStatus::Unstaged => ("U", Style::default().fg(Color::Yellow)),
+                StagingStatus::PartiallyStaged => ("P", Style::default().fg(Color::LightMagenta)),
             };
-            ListItem::new(Line::from(vec![
-                Span::styled(prefix, style.bold()),
-                Span::raw(&item.path),
-            ]))
+
+            let line = Line::from(vec![
+                Span::styled(format!("[{}]", staging_char), staging_style.bold()),
+                Span::raw(" "),
+                Span::styled(format!("[{}]", status_char), status_style.bold()),
+                Span::raw(" "),
+                Span::raw(&file.path),
+            ]);
+            ListItem::new(line)
         })
         .collect();
 
@@ -181,17 +73,15 @@ fn render_file_panel(f: &mut Frame, app: &mut App, panel_type: FocusedPanel, are
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(title)
-                .border_style(border_style),
+                .title(format!("Files ({})", app.files.len())),
         )
         .highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
         .highlight_symbol(">> ");
 
-    f.render_stateful_widget(list, area, state);
+    f.render_stateful_widget(list, area, &mut app.file_list_state);
 }
 
-
-// NEW: Renders the diff panel with colored lines.
+/// Renders the diff panel with colored lines.
 fn render_diff_panel(f: &mut Frame, app: &App, area: Rect) {
     let lines: Vec<Line> = app.diff_text.lines().map(|line| {
         let style = match line.chars().next() {
@@ -209,27 +99,21 @@ fn render_diff_panel(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(paragraph, area);
 }
 
-// MODIFIED: Updated hints for the new keybinding model.
+/// Renders the permanent status bar at the bottom.
 fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
     let loading_indicator = if app.is_loading { " [Loading...]" } else { "" };
-    let hints = "h: Home | ?: Help | q: Quit | Tab: Panels | space: Stage/Unstage | c: Commit | p: Push";
+    let hints = "j/k: Nav | space: Stage/Unstage | a: Stage All | c: Commit | P: Push | ?: Help | q: Quit";
 
-    let status_bar = Paragraph::new(Line::from(vec![
-        Span::raw(&app.message),
-        Span::raw(loading_indicator),
-    ]))
-    .alignment(Alignment::Left)
-    .block(
-        Block::default()
-            .borders(Borders::TOP)
-            .title(hints)
-            .title_alignment(Alignment::Right),
-    );
+    let left = Span::raw(format!("{}{}", app.message, loading_indicator));
+    let right = Span::styled(hints, Style::default().fg(Color::DarkGray));
+
+    let status_bar = Paragraph::new(Line::from(vec![left, Span::raw(" | ").fg(Color::DarkGray), right]))
+        .block(Block::default().style(Style::default().bg(Color::Black)));
     
     f.render_widget(status_bar, area);
 }
 
-// ... (render_input_popup and render_init_repo_popup are unchanged) ...
+/// Renders a generic popup for user input.
 fn render_input_popup(f: &mut Frame, app: &App, title: &str) {
     let block = Block::default()
         .title(title)
@@ -244,6 +128,7 @@ fn render_input_popup(f: &mut Frame, app: &App, title: &str) {
     f.set_cursor(area.x + app.input.len() as u16 + 1, area.y + 1);
 }
 
+/// Renders a confirmation popup for initializing a repository.
 fn render_init_repo_popup(f: &mut Frame) {
     let text = vec![
         Line::from(""),
@@ -263,29 +148,31 @@ fn render_init_repo_popup(f: &mut Frame) {
     f.render_widget(paragraph, area);
 }
 
-
-// MODIFIED: Updated help text for the new keybinding model.
+/// Renders the descriptive help popup with new ASCII art.
 fn render_help_popup(f: &mut Frame) {
+    let logo = vec![
+        Line::from(""),
+        Line::from("    _       _   _   _ "),
+        Line::from("   / \\   __| | | |_| |"),
+        Line::from("  / _ \\ / _` | | __| |"),
+        Line::from(" / ___ \\ (_| | | |_| |"),
+        Line::from("/_/   \\_\\__,_|  \\__|_|"),
+        Line::from(""),
+    ];
+
     let text = vec![
         Line::from("").style(Style::default()),
         Line::from(" Global Commands").style(Style::default().bold().underlined()),
         Line::from(vec![Span::styled("  q", Style::default().bold()), Span::raw(": Quit the application.")]),
         Line::from(vec![Span::styled("  ?", Style::default().bold()), Span::raw(": Toggle this help popup.")]),
-        Line::from(vec![Span::styled("  h", Style::default().bold()), Span::raw(": Go to the Home screen (from Status view).")]),
-        Line::from(vec![Span::styled("  s", Style::default().bold()), Span::raw(": Go to the Status screen (from Home view).")]),
+        Line::from(vec![Span::styled("  r", Style::default().bold()), Span::raw(": Manually refresh the Git status.")]),
         Line::from(""),
-        Line::from(" Status Screen Navigation").style(Style::default().bold().underlined()),
-        Line::from(vec![Span::styled("  j/k, ↓/↑", Style::default().bold()), Span::raw(": Navigate up and down in file panels.")]),
-        Line::from(vec![Span::styled("  Tab, l", Style::default().bold()), Span::raw(":  Cycle focus between Unstaged and Staged panels.")]),
-        Line::from(vec![Span::styled("  Shift+Tab, h", Style::default().bold()), Span::raw(": Cycle focus to the previous panel.")]),
-        Line::from(""),
-        Line::from(" Status Screen Actions").style(Style::default().bold().underlined()),
-        Line::from(vec![Span::styled("  space", Style::default().bold()), Span::raw(": Stage (if in Unstaged) or unstage (if in Staged) the selected file.")]),
-        Line::from(vec![Span::styled("  a", Style::default().bold()), Span::raw(":     Stage all unstaged files.")]),
-        Line::from(vec![Span::styled("  u", Style::default().bold()), Span::raw(":     Unstage all staged files.")]),
-        Line::from(vec![Span::styled("  c", Style::default().bold()), Span::raw(":     Open the commit message input popup.")]),
-        Line::from(vec![Span::styled("  p", Style::default().bold()), Span::raw(":     Push staged changes to the remote.")]),
-        Line::from(vec![Span::styled("  r", Style::default().bold()), Span::raw(":     Manually refresh the Git status.")]),
+        Line::from(" File Actions").style(Style::default().bold().underlined()),
+        Line::from(vec![Span::styled("  j/k, ↓/↑", Style::default().bold()), Span::raw(": Navigate up and down the file list.")]),
+        Line::from(vec![Span::styled("  space", Style::default().bold()), Span::raw(":     Stage or unstage the selected file.")]),
+        Line::from(vec![Span::styled("  a", Style::default().bold()), Span::raw(":         Stage all unstaged files.")]),
+        Line::from(vec![Span::styled("  c", Style::default().bold()), Span::raw(":         Open the commit message input popup.")]),
+        Line::from(vec![Span::styled("  P (Shift+P)", Style::default().bold()), Span::raw(": Push staged changes to the remote.")]),
     ];
     
     let block = Block::default()
@@ -294,13 +181,22 @@ fn render_help_popup(f: &mut Frame) {
         .title_bottom(Line::from(" Press ? or Esc to close ").centered());
         
     let area = centered_rect(80, 80, f.size());
-    let paragraph = Paragraph::new(text).block(block).wrap(Wrap { trim: true });
+    let content_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(7), Constraint::Min(0)])
+        .margin(1)
+        .split(area);
+
+    let logo_p = Paragraph::new(logo).alignment(Alignment::Center);
+    let paragraph = Paragraph::new(text).wrap(Wrap { trim: true });
 
     f.render_widget(Clear, area);
-    f.render_widget(paragraph, area);
+    f.render_widget(block, area);
+    f.render_widget(logo_p, content_chunks[0]);
+    f.render_widget(paragraph, content_chunks[1]);
 }
 
-// ... (centered_rect is unchanged) ...
+/// Helper function to create a centered rectangle for popups.
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)

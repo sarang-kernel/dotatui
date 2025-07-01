@@ -1,6 +1,6 @@
 // src/tui.rs
 
-use crate::app::{Action, App, AppMode, FocusedPanel, PopupMode};
+use crate::app::{Action, App, AppMode, PopupMode};
 use crate::error::{self, Result};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use crossterm::terminal::{disable_raw_mode, LeaveAlternateScreen};
@@ -14,6 +14,7 @@ use std::io::{self, Stderr};
 use std::time::Duration;
 use tokio::sync::mpsc;
 
+/// A struct that handles the terminal user interface lifecycle.
 pub struct Tui {
     terminal: Terminal<CrosstermBackend<Stderr>>,
 }
@@ -36,6 +37,7 @@ impl Tui {
         Ok(())
     }
 
+    /// Runs a special, minimal event loop to get the dotfiles path from the user.
     pub fn run_setup_prompt(&mut self) -> Result<String> {
         let mut path_input = String::new();
         loop {
@@ -59,7 +61,6 @@ impl Tui {
             if event::poll(Duration::from_millis(250))? {
                 if let Event::Key(key) = event::read()? {
                     if key.kind == KeyEventKind::Press {
-                        // CORRECTED: Reordered patterns to make Ctrl-C reachable.
                         match key.code {
                             KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
                                 return Err(error::Error::Io(io::Error::new(
@@ -103,6 +104,7 @@ impl Tui {
         Ok(())
     }
 
+    /// Translates a `KeyEvent` into an `Action` based on the current `AppMode`.
     fn handle_key_event(
         &self,
         key: KeyEvent,
@@ -110,8 +112,7 @@ impl Tui {
         action_tx: &mpsc::UnboundedSender<Action>,
     ) -> Result<()> {
         let action = match app.mode {
-            AppMode::Home => self.handle_home_mode_key(key),
-            AppMode::Status => self.handle_status_mode_key(key),
+            AppMode::Normal => self.handle_normal_mode_key(key),
             AppMode::Popup(_) => self.handle_popup_mode_key(key, app),
         };
 
@@ -122,36 +123,28 @@ impl Tui {
         Ok(())
     }
 
-    fn handle_home_mode_key(&self, key: KeyEvent) -> Option<Action> {
+    /// Handles key events when the app is in the main view.
+    fn handle_normal_mode_key(&self, key: KeyEvent) -> Option<Action> {
         match key.code {
-            KeyCode::Char('q') => Some(Action::Quit),
-            KeyCode::Char('s') => Some(Action::GoToStatus),
-            KeyCode::Char('c') => Some(Action::EnterPopup(PopupMode::ChangePath)),
-            KeyCode::Char('h') | KeyCode::Char('?') => Some(Action::ToggleHelp),
-            _ => None,
-        }
-    }
-
-    fn handle_status_mode_key(&self, key: KeyEvent) -> Option<Action> {
-        match key.code {
+            // App Control
             KeyCode::Char('q') => Some(Action::Quit),
             KeyCode::Char('?') => Some(Action::ToggleHelp),
-            KeyCode::Char('h') => Some(Action::GoToHome),
+
+            // Navigation
             KeyCode::Char('j') | KeyCode::Down => Some(Action::NavigateDown),
             KeyCode::Char('k') | KeyCode::Up => Some(Action::NavigateUp),
-            KeyCode::Char('l') | KeyCode::Right | KeyCode::Tab => Some(Action::FocusNextPanel),
-            // CORRECTED: `h` is no longer an alias for previous panel, only BackTab is.
-            KeyCode::BackTab => Some(Action::FocusPrevPanel),
-            KeyCode::Char('r') => Some(Action::RefreshStatus),
+
+            // Actions
+            KeyCode::Char(' ') => Some(Action::StageUnstage),
             KeyCode::Char('a') => Some(Action::StageAll),
-            KeyCode::Char('u') => Some(Action::UnstageAll),
             KeyCode::Char('c') => Some(Action::EnterPopup(PopupMode::Commit)),
-            KeyCode::Char('p') => Some(Action::Push),
-            KeyCode::Char(' ') => Some(Action::StageFile),
+            KeyCode::Char('P') => Some(Action::Push), // Shift+P for a "heavy" action
+            KeyCode::Char('r') => Some(Action::RefreshStatus),
             _ => None,
         }
     }
 
+    /// Handles key events when a popup is active.
     fn handle_popup_mode_key(&self, key: KeyEvent, app: &App) -> Option<Action> {
         match key.code {
             KeyCode::Esc => Some(Action::ExitPopup),

@@ -4,9 +4,10 @@ use crate::{
     config::KeyBindings,
     error::{AppError, AppResult},
     event::{AppEvent, EventHandler},
-    git::{CommitInfo, GitRepo, StatusItem},
+    git::{CommitInfo, GitRepo, Hunk, StatusItem},
 };
 use crossterm::event::{KeyCode, KeyEvent};
+use log::info; // Import the info macro
 use ratatui::widgets::{ListState, TableState};
 use tokio::sync::mpsc;
 
@@ -16,19 +17,23 @@ pub enum AppReturn {
     Exit,
 }
 
-/// The current high-level mode of the application.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StatusMode {
+    FileSelection,
+    HunkSelection,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Mode {
-    Status,
+    Status(StatusMode),
     Log,
 }
 
-/// Popups that can be drawn over the main UI.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Popup {
     Help,
     Commit,
-    Pushing(String), // The string contains the status message
+    Pushing(String),
 }
 
 pub struct App {
@@ -44,6 +49,8 @@ pub struct App {
     pub cursor_pos: usize,
     exiting: bool,
     app_event_sender: mpsc::UnboundedSender<AppEvent>,
+    pub current_hunks: Vec<Hunk>,
+    pub hunk_list_state: ListState,
 }
 
 impl App {
@@ -51,7 +58,7 @@ impl App {
         let mut app = Self {
             repo,
             keys: KeyBindings::default(),
-            mode: Mode::Status,
+            mode: Mode::Status(StatusMode::FileSelection),
             popup: None,
             status_items: Vec::new(),
             status_list_state: ListState::default(),
@@ -61,8 +68,10 @@ impl App {
             cursor_pos: 0,
             exiting: false,
             app_event_sender: event_handler.get_app_event_sender(),
+            current_hunks: Vec::new(),
+            hunk_list_state: ListState::default(),
         };
-        app.refresh().unwrap(); // Initial data load
+        app.refresh().unwrap();
         app
     }
 
@@ -70,7 +79,6 @@ impl App {
         self.exiting
     }
 
-    /// Refreshes all application data from the git repo.
     pub fn refresh(&mut self) -> AppResult<()> {
         self.status_items = self.repo.get_status()?;
         self.log_entries = self.repo.get_log()?;
@@ -88,15 +96,22 @@ impl App {
         Ok(())
     }
 
-    /// Handles a key press event and returns an `AppReturn` value.
     pub fn handle_key_event(&mut self, key: KeyEvent) -> AppResult<AppReturn> {
+        info!("Received key event: {:?}", key.code);
+
         if self.popup.is_some() {
-            // Clone popup to avoid borrowing issues
             let popup = self.popup.clone().unwrap();
             return self.handle_popup_keys(key, popup);
         }
 
         if key == self.keys.quit {
+            if let Mode::Status(StatusMode::HunkSelection) = self.mode {
+                info!("Quitting HunkSelection mode, returning to FileSelection");
+                self.mode = Mode::Status(StatusMode::FileSelection);
+                self.current_hunks.clear();
+                self.hunk_list_state.select(None);
+                return Ok(AppReturn::Continue);
+            }
             self.exiting = true;
             return Ok(AppReturn::Exit);
         }
@@ -106,14 +121,13 @@ impl App {
         }
 
         match self.mode {
-            Mode::Status => self.handle_status_keys(key)?,
+            Mode::Status(sub_mode) => self.handle_status_keys(key, sub_mode)?,
             Mode::Log => self.handle_log_keys(key)?,
         }
 
         Ok(AppReturn::Continue)
     }
 
-    /// Handles an internal application event.
     pub fn handle_app_event(&mut self, event: AppEvent) -> AppResult<()> {
         match event {
             AppEvent::PushFinished(result) => {
@@ -139,11 +153,10 @@ impl App {
                 }
             }
             _ => {
-                // For Help and Pushing popups
                 if key == self.keys.close_popup || key == self.keys.confirm {
                     self.popup = None;
                     if let Popup::Pushing(_) = popup {
-                        self.refresh()?; // Refresh state after push attempt
+                        self.refresh()?;
                     }
                 }
             }
@@ -151,28 +164,51 @@ impl App {
         Ok(AppReturn::Continue)
     }
 
-    fn handle_status_keys(&mut self, key: KeyEvent) -> AppResult<()> {
-        if key == self.keys.log_mode {
-            self.mode = Mode::Log;
-        } else if key == self.keys.select_next {
-            self.select_next_status_item();
-        } else if key == self.keys.select_prev {
-            self.select_previous_status_item();
-        } else if key == self.keys.stage_item {
-            self.stage_selected()?;
-        } else if key == self.keys.unstage_item {
-            self.unstage_selected()?;
-        } else if key == self.keys.commit {
-            self.popup = Some(Popup::Commit);
-        } else if key == self.keys.push {
-            self.push_to_remote();
+    fn handle_status_keys(&mut self, key: KeyEvent, sub_mode: StatusMode) -> AppResult<()> {
+        match sub_mode {
+            StatusMode::FileSelection => {
+                if key == self.keys.log_mode {
+                    self.mode = Mode::Log;
+                } else if key == self.keys.select_next {
+                    self.select_next_status_item();
+                } else if key == self.keys.select_prev {
+                    self.select_previous_status_item();
+                } else if key == self.keys.stage_item {
+                    self.stage_selected()?;
+                } else if key == self.keys.unstage_item {
+                    self.unstage_selected()?;
+                } else if key == self.keys.commit {
+                    self.popup = Some(Popup::Commit);
+                } else if key == self.keys.push {
+                    self.push_to_remote();
+                } else if key == self.keys.confirm {
+                    // By cloning the item, we release the immutable borrow of `self` immediately.
+                    if let Some(item) = self.get_selected_status_item().cloned() {
+                        self.current_hunks = self.repo.get_diff_hunks(&item)?;
+                        if !self.current_hunks.is_empty() {
+                            info!("Entering HunkSelection mode for file: {}", item.path);
+                            self.mode = Mode::Status(StatusMode::HunkSelection);
+                            self.hunk_list_state.select(Some(0));
+                        } else {
+                            info!("No hunks to select for file: {}", item.path);
+                        }
+                    }
+                }
+            }
+            StatusMode::HunkSelection => {
+                if key == self.keys.select_next {
+                    self.select_next_hunk();
+                } else if key == self.keys.select_prev {
+                    self.select_previous_hunk();
+                }
+            }
         }
         Ok(())
     }
 
     fn handle_log_keys(&mut self, key: KeyEvent) -> AppResult<()> {
-        if key == self.keys.status_mode {
-            self.mode = Mode::Status;
+        if let Mode::Status(_) = self.mode {
+            self.mode = Mode::Status(StatusMode::FileSelection);
         } else if key == self.keys.select_next {
             self.select_next_log_item();
         } else if key == self.keys.select_prev {
@@ -206,8 +242,6 @@ impl App {
             _ => {}
         }
     }
-
-    // Action methods
 
     fn stage_selected(&mut self) -> AppResult<()> {
         if let Some(selected) = self.status_list_state.selected() {
@@ -248,40 +282,27 @@ impl App {
         self.popup = Some(Popup::Pushing("Pushing...".to_string()));
         let repo_path = self.repo.path().to_path_buf();
         let sender = self.app_event_sender.clone();
-
         tokio::spawn(async move {
             let push_result = async {
-                // Open a new repo instance in the background thread.
                 let repo = git2::Repository::open(repo_path)?;
                 let mut remote = repo.find_remote("origin")?;
-
-                // Authentication setup
                 let mut callbacks = git2::RemoteCallbacks::new();
                 callbacks.credentials(|_url, username, _| {
                     git2::Cred::ssh_key_from_agent(username.unwrap_or("git"))
                 });
-
-                // Push options with credentials
                 let mut push_options = git2::PushOptions::new();
                 push_options.remote_callbacks(callbacks);
-
-                // Determine the refspec (e.g., "refs/heads/main:refs/heads/main")
                 let head = repo.head()?;
                 let head_name = head.shorthand().unwrap_or("main");
                 let refspec = format!("refs/heads/{}:refs/heads/{}", head_name, head_name);
-
-                // Perform the push
                 remote
                     .push(&[refspec], Some(&mut push_options))
                     .map_err(|e| AppError::PushFailed(e.to_string()))
             }
             .await;
-
             let _ = sender.send(AppEvent::PushFinished(push_result));
         });
     }
-
-    // Navigation methods
 
     fn select_next_status_item(&mut self) {
         if self.status_items.is_empty() {
@@ -306,6 +327,33 @@ impl App {
             }
         });
         self.status_list_state.select(Some(i));
+    }
+
+    fn select_next_hunk(&mut self) {
+        if self.current_hunks.is_empty() {
+            return;
+        }
+        let i = self
+            .hunk_list_state
+            .selected()
+            .map_or(0, |i| (i + 1) % self.current_hunks.len());
+        self.hunk_list_state.select(Some(i));
+        info!("Selected hunk index: {}", i);
+    }
+
+    fn select_previous_hunk(&mut self) {
+        if self.current_hunks.is_empty() {
+            return;
+        }
+        let i = self.hunk_list_state.selected().map_or(0, |i| {
+            if i == 0 {
+                self.current_hunks.len() - 1
+            } else {
+                i - 1
+            }
+        });
+        self.hunk_list_state.select(Some(i));
+        info!("Selected hunk index: {}", i);
     }
 
     fn select_next_log_item(&mut self) {

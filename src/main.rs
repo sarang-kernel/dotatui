@@ -7,10 +7,25 @@ use dotatui::{
     git::GitRepo,
     tui::Tui,
 };
-use std::env;
+use std::{env, fs::File};
+
+// Add these imports for logging
+use log::LevelFilter;
+use simplelog::{Config, WriteLogger};
 
 #[tokio::main]
 async fn main() -> AppResult<()> {
+    // --- Logging Setup ---
+    // Initializes the logger. Any call to `log::info!`, `log::debug!`, etc.
+    // will be written to `dotatui.log`.
+    WriteLogger::init(
+        LevelFilter::Info, // Change to `Debug` or `Trace` for more verbose logging
+        Config::default(),
+        File::create("dotatui.log")?,
+    )
+    .expect("Failed to initialize logger");
+    // --- End Logging Setup ---
+
     // Initialize git repo
     let repo_path = env::current_dir()?;
     let repo = GitRepo::new(repo_path)?;

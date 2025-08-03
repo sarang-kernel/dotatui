@@ -1,7 +1,7 @@
 //! src/ui.rs
 
-use crate::app::{App, Mode, Popup};
-use crate::git::StatusItem; // Correctly import StatusItem directly
+use crate::app::{App, Mode, Popup, StatusMode};
+use crate::git::StatusItem;
 use git2::Status;
 use ratatui::{
     prelude::*,
@@ -18,12 +18,11 @@ pub fn render(frame: &mut Frame, app: &mut App) {
     render_footer(frame, app, main_layout[2]);
 
     match app.mode {
-        Mode::Status => render_status_view(frame, app, main_layout[1]),
+        Mode::Status(sub_mode) => render_status_view(frame, app, main_layout[1], sub_mode),
         Mode::Log => render_log_view(frame, app, main_layout[1]),
     }
 
     if let Some(popup) = &app.popup {
-        // Pass only the necessary data to the popup renderer to satisfy the borrow checker.
         render_popup(frame, popup, &app.commit_msg, app.cursor_pos);
     }
 }
@@ -31,7 +30,7 @@ pub fn render(frame: &mut Frame, app: &mut App) {
 fn render_tabs(frame: &mut Frame, app: &App, area: Rect) {
     let titles = vec!["[S]tatus", "[L]og"];
     let selected_index = match app.mode {
-        Mode::Status => 0,
+        Mode::Status(_) => 0,
         Mode::Log => 1,
     };
     let tabs = Tabs::new(titles)
@@ -46,16 +45,14 @@ fn render_tabs(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(tabs, area);
 }
 
-fn render_status_view(frame: &mut Frame, app: &mut App, area: Rect) {
+fn render_status_view(frame: &mut Frame, app: &mut App, area: Rect, sub_mode: StatusMode) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(40), Constraint::Percentage(60)].as_ref())
         .split(area);
 
-    // Left Panel: Files
     let (staged_items, unstaged_items): (Vec<_>, Vec<_>) =
         app.status_items.iter().partition(|item| item.is_staged);
-
     let mut all_list_items = Vec::new();
     if !staged_items.is_empty() {
         all_list_items
@@ -68,17 +65,21 @@ fn render_status_view(frame: &mut Frame, app: &mut App, area: Rect) {
         );
         all_list_items.extend(unstaged_items.iter().map(|item| status_to_list_item(item)));
     }
-
     let file_list = List::new(all_list_items)
         .block(Block::default().borders(Borders::ALL).title("Files"))
         .highlight_style(Style::default().bg(Color::DarkGray))
         .highlight_symbol(">> ");
     frame.render_stateful_widget(file_list, chunks[0], &mut app.status_list_state);
 
-    // Right Panel: Diff
+    let diff_title = match sub_mode {
+        StatusMode::FileSelection => "Diff (Press 'enter' to select hunks)",
+        StatusMode::HunkSelection => "Diff (Press 'q' to exit hunk-mode)",
+    };
+
+    // Use the correct function name: get_diff_text
     let diff_text = if let Some(item) = app.get_selected_status_item() {
         app.repo
-            .get_diff(item)
+            .get_diff_text(item)
             .unwrap_or_else(|_| "Error loading diff".to_string())
     } else {
         "Select a file to see the diff.".to_string()
@@ -99,8 +100,7 @@ fn render_status_view(frame: &mut Frame, app: &mut App, area: Rect) {
             Line::styled(line_content.to_string(), style)
         })
         .collect();
-
-    let diff_view = Paragraph::new(diff_lines).block(Block::default().borders(Borders::ALL).title("Diff"));
+    let diff_view = Paragraph::new(diff_lines).block(Block::default().borders(Borders::ALL).title(diff_title));
     frame.render_widget(diff_view, chunks[1]);
 }
 
@@ -109,7 +109,6 @@ fn render_log_view(frame: &mut Frame, app: &mut App, area: Rect) {
         .iter()
         .map(|h| Cell::from(*h).style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)));
     let header = Row::new(header_cells).height(1).bottom_margin(1);
-
     let rows = app.log_entries.iter().map(|commit| {
         Row::new(vec![
             Cell::from(commit.id.clone()),
@@ -117,7 +116,6 @@ fn render_log_view(frame: &mut Frame, app: &mut App, area: Rect) {
             Cell::from(commit.time.clone()),
         ])
     });
-
     let table = Table::new(
         rows,
         [
@@ -130,7 +128,6 @@ fn render_log_view(frame: &mut Frame, app: &mut App, area: Rect) {
     .block(Block::default().borders(Borders::ALL).title("Log"))
     .highlight_style(Style::default().bg(Color::DarkGray))
     .highlight_symbol(">> ");
-
     frame.render_stateful_widget(table, area, &mut app.log_table_state);
 }
 
@@ -162,8 +159,7 @@ fn status_to_prefix_and_color(status: Status) -> (&'static str, Color) {
 fn render_popup(frame: &mut Frame, popup: &Popup, commit_msg: &str, cursor_pos: usize) {
     let popup_area = centered_rect(60, 25, frame.size());
     let block = Block::default().borders(Borders::ALL);
-    frame.render_widget(Clear, popup_area); // This clears the background
-
+    frame.render_widget(Clear, popup_area);
     let content = match popup {
         Popup::Help => {
             let text = vec![
@@ -188,8 +184,12 @@ fn render_popup(frame: &mut Frame, popup: &Popup, commit_msg: &str, cursor_pos: 
                     Span::raw(": navigate lists"),
                 ]),
                 Line::from(vec![
+                    Span::styled("enter", Style::default().bold()),
+                    Span::raw(": enter hunk selection mode"),
+                ]),
+                Line::from(vec![
                     Span::styled("space", Style::default().bold()),
-                    Span::raw(": stage item"),
+                    Span::raw(": stage item/hunk"),
                 ]),
                 Line::from(vec![
                     Span::styled("u", Style::default().bold()),
@@ -208,10 +208,6 @@ fn render_popup(frame: &mut Frame, popup: &Popup, commit_msg: &str, cursor_pos: 
                     Span::styled("esc", Style::default().bold()),
                     Span::raw(": close popups"),
                 ]),
-                Line::from(vec![
-                    Span::styled("enter", Style::default().bold()),
-                    Span::raw(": confirm actions"),
-                ]),
             ];
             Paragraph::new(text)
                 .block(block.title(" Help (?) "))
@@ -220,7 +216,6 @@ fn render_popup(frame: &mut Frame, popup: &Popup, commit_msg: &str, cursor_pos: 
         Popup::Commit => {
             let p = Paragraph::new(commit_msg)
                 .block(block.title(" Commit Message (Enter to confirm, Esc to cancel) "));
-            // Set cursor for input
             frame.set_cursor(popup_area.x + cursor_pos as u16 + 1, popup_area.y + 1);
             p
         }
@@ -229,7 +224,6 @@ fn render_popup(frame: &mut Frame, popup: &Popup, commit_msg: &str, cursor_pos: 
             .alignment(Alignment::Center)
             .wrap(Wrap { trim: true }),
     };
-
     frame.render_widget(content, popup_area);
 }
 
@@ -241,7 +235,6 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(footer, area);
 }
 
-/// Helper function to create a centered rectangle for popups.
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)
@@ -251,7 +244,6 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
             Constraint::Percentage((100 - percent_y) / 2),
         ])
         .split(r);
-
     Layout::default()
         .direction(Direction::Horizontal)
         .constraints([

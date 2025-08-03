@@ -149,9 +149,19 @@ impl GitRepo {
         }
     }
 
-    pub fn stage_file(&self, path: &str) -> AppResult<()> {
+    /// Stages an item based on its status. Correctly handles additions, modifications, and deletions.
+    pub fn stage_item(&self, item: &StatusItem) -> AppResult<()> {
         let mut index = self.repo.index()?;
-        index.add_path(Path::new(path))?;
+        let path = Path::new(&item.path);
+
+        if item.status.is_wt_deleted() {
+            // Use `remove_path` for deletions.
+            index.remove_path(path)?;
+        } else {
+            // Use `add_path` for new, modified, or renamed files.
+            index.add_path(path)?;
+        }
+
         index.write()?;
         Ok(())
     }

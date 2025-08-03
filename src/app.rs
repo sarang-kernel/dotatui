@@ -7,7 +7,7 @@ use crate::{
     git::{CommitInfo, GitRepo, Hunk, StatusItem},
 };
 use crossterm::event::{KeyCode, KeyEvent};
-use log::info; // Import the info macro
+use log::{debug, error, info};
 use ratatui::widgets::{ListState, TableState};
 use tokio::sync::mpsc;
 
@@ -80,8 +80,15 @@ impl App {
     }
 
     pub fn refresh(&mut self) -> AppResult<()> {
+        info!("Refreshing app state...");
         self.status_items = self.repo.get_status()?;
         self.log_entries = self.repo.get_log()?;
+        info!(
+            "Refresh complete. Found {} status items and {} log entries.",
+            self.status_items.len(),
+            self.log_entries.len()
+        );
+
         if self.status_items.is_empty() {
             self.status_list_state.select(None);
         } else if self.status_list_state.selected().is_none() {
@@ -97,7 +104,7 @@ impl App {
     }
 
     pub fn handle_key_event(&mut self, key: KeyEvent) -> AppResult<AppReturn> {
-        info!("Received key event: {:?}", key.code);
+        debug!("Received key event: {:?}", key.code);
 
         if self.popup.is_some() {
             let popup = self.popup.clone().unwrap();
@@ -132,8 +139,14 @@ impl App {
         match event {
             AppEvent::PushFinished(result) => {
                 let msg = match result {
-                    Ok(_) => "Push successful!".to_string(),
-                    Err(e) => format!("Push failed: {}", e),
+                    Ok(_) => {
+                        info!("Async push operation completed successfully.");
+                        "Push successful!".to_string()
+                    }
+                    Err(e) => {
+                        error!("Async push operation failed: {}", e);
+                        format!("Push failed: {}", e)
+                    }
                 };
                 self.popup = Some(Popup::Pushing(msg));
             }
@@ -182,7 +195,6 @@ impl App {
                 } else if key == self.keys.push {
                     self.push_to_remote();
                 } else if key == self.keys.confirm {
-                    // By cloning the item, we release the immutable borrow of `self` immediately.
                     if let Some(item) = self.get_selected_status_item().cloned() {
                         self.current_hunks = self.repo.get_diff_hunks(&item)?;
                         if !self.current_hunks.is_empty() {
@@ -247,7 +259,8 @@ impl App {
         if let Some(selected) = self.status_list_state.selected() {
             if let Some(item) = self.status_items.get(selected) {
                 if !item.is_staged {
-                    self.repo.stage_file(&item.path)?;
+                    info!("Staging item: {}", item.path);
+                    self.repo.stage_item(item)?; // Use the new, smarter function
                     self.refresh()?;
                 }
             }
@@ -259,6 +272,7 @@ impl App {
         if let Some(selected) = self.status_list_state.selected() {
             if let Some(item) = self.status_items.get(selected) {
                 if item.is_staged {
+                    info!("Unstaging file: {}", item.path);
                     self.repo.unstage_file(&item.path)?;
                     self.refresh()?;
                 }
@@ -269,7 +283,9 @@ impl App {
 
     fn submit_commit(&mut self) -> AppResult<()> {
         if !self.commit_msg.is_empty() {
+            info!("Attempting to commit with message: '{}'", self.commit_msg);
             self.repo.commit(&self.commit_msg)?;
+            info!("Commit successful.");
             self.commit_msg.clear();
             self.cursor_pos = 0;
             self.popup = None;
@@ -279,6 +295,7 @@ impl App {
     }
 
     fn push_to_remote(&mut self) {
+        info!("Spawning background task for git push.");
         self.popup = Some(Popup::Pushing("Pushing...".to_string()));
         let repo_path = self.repo.path().to_path_buf();
         let sender = self.app_event_sender.clone();
@@ -338,7 +355,7 @@ impl App {
             .selected()
             .map_or(0, |i| (i + 1) % self.current_hunks.len());
         self.hunk_list_state.select(Some(i));
-        info!("Selected hunk index: {}", i);
+        debug!("Selected hunk index: {}", i);
     }
 
     fn select_previous_hunk(&mut self) {
@@ -353,7 +370,7 @@ impl App {
             }
         });
         self.hunk_list_state.select(Some(i));
-        info!("Selected hunk index: {}", i);
+        debug!("Selected hunk index: {}", i);
     }
 
     fn select_next_log_item(&mut self) {

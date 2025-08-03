@@ -14,7 +14,8 @@ pub enum AppError {
 
     #[error("Event channel closed unexpectedly")]
     EventChannelClosed,
-    
+
+    // This is the existing error, but it's now used more explicitly.
     #[error("No git repository found at or above the current directory")]
     RepoNotFound,
 

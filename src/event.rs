@@ -1,25 +1,23 @@
 //! src/event.rs
 
 use crate::error::{AppError, AppResult};
-use crossterm::event::{self, Event as CrosstermEvent, KeyEvent};
+use crossterm::event::{self, Event as CrosstermEvent, KeyEvent, MouseEvent};
 use std::time::Duration;
 use tokio::sync::mpsc;
 
-/// Application-level events, used for communication between tasks.
 #[derive(Debug)]
 pub enum AppEvent {
     PushFinished(AppResult<()>),
-    // Add other events like FetchFinished, etc.
 }
 
-/// Terminal events (user input).
+/// Terminal events (user input)
 #[derive(Debug)]
 pub enum InputEvent {
     Key(KeyEvent),
+    Mouse(MouseEvent),
     Tick,
 }
 
-/// The main event handler for the application.
 pub struct EventHandler {
     input_rx: mpsc::UnboundedReceiver<InputEvent>,
     app_rx: mpsc::UnboundedReceiver<AppEvent>,
@@ -36,10 +34,20 @@ impl EventHandler {
             tokio::spawn(async move {
                 loop {
                     if event::poll(Duration::from_millis(100)).unwrap_or(false) {
-                        if let Ok(CrosstermEvent::Key(key)) = event::read() {
-                            if input_tx.send(InputEvent::Key(key)).is_err() {
-                                break;
+                        match event::read() {
+                            Ok(CrosstermEvent::Key(key)) => {
+                                if input_tx.send(InputEvent::Key(key)).is_err() {
+                                    break;
+                                }
                             }
+
+                            // Capture mouse events
+                            Ok(CrosstermEvent::Mouse(mouse)) => {
+                                if input_tx.send(InputEvent::Mouse(mouse)).is_err() {
+                                    break;
+                                }
+                            }
+                            _ => {} //Other events like Resize are ignored for now
                         }
                     }
                     if input_tx.send(InputEvent::Tick).is_err() {
@@ -48,7 +56,6 @@ impl EventHandler {
                 }
             })
         };
-
         Self {
             input_rx,
             app_rx,
@@ -57,22 +64,19 @@ impl EventHandler {
         }
     }
 
-    /// Receive the next event, from either user input or app-internal messages.
-    pub async fn next(&mut self) -> AppResult<Either<InputEvent, AppEvent>> {
+    pub async fn next(&mut self) -> AppResult<Either<InputEvent,AppEvent>> {
         tokio::select! {
             Some(event) = self.input_rx.recv() => Ok(Either::Left(event)),
             Some(event) = self.app_rx.recv() => Ok(Either::Right(event)),
             else => Err(AppError::EventChannelClosed),
         }
     }
-    
-    /// Get a sender to dispatch application-level events.
+
     pub fn get_app_event_sender(&self) -> mpsc::UnboundedSender<AppEvent> {
         self.app_tx.clone()
     }
 }
 
-/// A simple enum to represent one of two possible types.
 pub enum Either<L, R> {
     Left(L),
     Right(R),

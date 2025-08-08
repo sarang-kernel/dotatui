@@ -1,231 +1,46 @@
-08:24:14 [INFO] Dotatui started in repository: "/home/sarang/Development/scripts/dotatui"
-08:24:14 [INFO] Refreshing app state...
-08:24:14 [INFO] Refresh complete. Found 12 status items and 12 log entries.
-08:24:16 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:18 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:18 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:18 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:18 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:18 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:19 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:19 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:20 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:20 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:24:20 [INFO] Staging item: ui.rs
-08:24:20 [INFO] Refreshing app state...
-08:24:20 [INFO] Refresh complete. Found 12 status items and 12 log entries.
-08:24:21 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:24:22 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:23 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:24:24 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:24 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:24 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:24 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:24:25 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:24:26 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:26 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:26 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:27 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:27 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:27 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:24:29 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:30 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:30 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:30 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:30 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:31 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:31 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:31 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:32 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:24:34 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:24:38 [DEBUG] (1) dotatui::app: Received key event: Enter
-08:24:38 [INFO] Entering HunkSelection mode for file: ui.rs
-08:24:40 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:24:40 [DEBUG] (1) dotatui::app: Selected hunk index: 0
-08:24:43 [DEBUG] (1) dotatui::app: Received key event: Char('q')
-08:24:43 [INFO] Quitting HunkSelection mode, returning to FileSelection
-08:26:48 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:26:49 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:29 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:29 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:29 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:29 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:29 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:30 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:30 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:30 [DEBUG] (1) dotatui::app: Received key event: Char('c')
-08:27:35 [DEBUG] (1) dotatui::app: Received key event: Char('s')
-08:27:35 [DEBUG] (1) dotatui::app: Received key event: Char('o')
-08:27:35 [DEBUG] (1) dotatui::app: Received key event: Char('m')
-08:27:35 [DEBUG] (1) dotatui::app: Received key event: Char('e')
-08:27:35 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:35 [DEBUG] (1) dotatui::app: Received key event: Char('e')
-08:27:35 [DEBUG] (1) dotatui::app: Received key event: Char('l')
-08:27:36 [DEBUG] (1) dotatui::app: Received key event: Backspace
-08:27:36 [DEBUG] (1) dotatui::app: Received key event: Char('s')
-08:27:36 [DEBUG] (1) dotatui::app: Received key event: Char('e')
-08:27:37 [DEBUG] (1) dotatui::app: Received key event: Backspace
-08:27:37 [DEBUG] (1) dotatui::app: Received key event: Char('s')
-08:27:37 [DEBUG] (1) dotatui::app: Received key event: Char('e')
-08:27:38 [DEBUG] (1) dotatui::app: Received key event: Char('s')
-08:27:38 [DEBUG] (1) dotatui::app: Received key event: Backspace
-08:27:38 [DEBUG] (1) dotatui::app: Received key event: Char('n')
-08:27:38 [DEBUG] (1) dotatui::app: Received key event: Char('t')
-08:27:39 [DEBUG] (1) dotatui::app: Received key event: Char('i')
-08:27:39 [DEBUG] (1) dotatui::app: Received key event: Char('a')
-08:27:39 [DEBUG] (1) dotatui::app: Received key event: Char('l')
-08:27:39 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:40 [DEBUG] (1) dotatui::app: Received key event: Char('c')
-08:27:40 [DEBUG] (1) dotatui::app: Received key event: Char('h')
-08:27:40 [DEBUG] (1) dotatui::app: Received key event: Char('a')
-08:27:40 [DEBUG] (1) dotatui::app: Received key event: Char('n')
-08:27:40 [DEBUG] (1) dotatui::app: Received key event: Char('g')
-08:27:40 [DEBUG] (1) dotatui::app: Received key event: Char('e')
-08:27:40 [DEBUG] (1) dotatui::app: Received key event: Char('s')
-08:27:40 [DEBUG] (1) dotatui::app: Received key event: Enter
-08:27:40 [INFO] Attempting to commit with message: 'some essential changes'
-08:27:40 [INFO] Commit successful.
-08:27:40 [INFO] Refreshing app state...
-08:27:40 [INFO] Refresh complete. Found 7 status items and 13 log entries.
-08:27:42 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:42 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:42 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:42 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:42 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:43 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:43 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:43 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:43 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:44 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:44 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:44 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:44 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:44 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:45 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:45 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:45 [INFO] Staging item: src/main.rs
-08:27:45 [INFO] Refreshing app state...
-08:27:45 [INFO] Refresh complete. Found 7 status items and 13 log entries.
-08:27:46 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:46 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:46 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:46 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:47 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:47 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:47 [INFO] Staging item: src/app.rs
-08:27:47 [INFO] Refreshing app state...
-08:27:47 [INFO] Refresh complete. Found 7 status items and 13 log entries.
-08:27:48 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:48 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:49 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:49 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:49 [INFO] Staging item: src/error.rs
-08:27:49 [INFO] Refreshing app state...
-08:27:49 [INFO] Refresh complete. Found 7 status items and 13 log entries.
-08:27:49 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:50 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:50 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:50 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:50 [INFO] Staging item: src/git.rs
-08:27:50 [INFO] Refreshing app state...
-08:27:50 [INFO] Refresh complete. Found 7 status items and 13 log entries.
-08:27:50 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:51 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:51 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:51 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:51 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:52 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:52 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:52 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:53 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:53 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:27:54 [DEBUG] (1) dotatui::app: Received key event: Char('c')
-08:27:55 [DEBUG] (1) dotatui::app: Received key event: Char('s')
-08:27:55 [DEBUG] (1) dotatui::app: Received key event: Char('o')
-08:27:56 [DEBUG] (1) dotatui::app: Received key event: Char('m')
-08:27:56 [DEBUG] (1) dotatui::app: Received key event: Char('e')
-08:27:56 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:56 [DEBUG] (1) dotatui::app: Received key event: Char('o')
-08:27:56 [DEBUG] (1) dotatui::app: Received key event: Char('m')
-08:27:56 [DEBUG] (1) dotatui::app: Received key event: Char('o')
-08:27:56 [DEBUG] (1) dotatui::app: Received key event: Backspace
-08:27:57 [DEBUG] (1) dotatui::app: Received key event: Backspace
-08:27:57 [DEBUG] (1) dotatui::app: Received key event: Backspace
-08:27:57 [DEBUG] (1) dotatui::app: Received key event: Char('m')
-08:27:57 [DEBUG] (1) dotatui::app: Received key event: Char('o')
-08:27:57 [DEBUG] (1) dotatui::app: Received key event: Char('r')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char('e')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char('c')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char('h')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char('a')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char('n')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char('g')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char('e')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char('s')
-08:27:58 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:27:59 [DEBUG] (1) dotatui::app: Received key event: Enter
-08:27:59 [INFO] Attempting to commit with message: 'some more changes '
-08:27:59 [INFO] Commit successful.
-08:27:59 [INFO] Refreshing app state...
-08:27:59 [INFO] Refresh complete. Found 3 status items and 14 log entries.
-08:27:59 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:27:59 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:00 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:00 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:00 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:01 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:01 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:02 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:02 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:03 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:04 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:04 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:28:04 [INFO] Staging item: dotatui.log
-08:28:04 [INFO] Refreshing app state...
-08:28:04 [INFO] Refresh complete. Found 4 status items and 14 log entries.
-08:28:06 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:06 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:28:07 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:07 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:07 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:08 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:09 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:09 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:09 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:10 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:10 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:11 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:14 [DEBUG] (1) dotatui::app: Received key event: Char('?')
-08:28:16 [DEBUG] (1) dotatui::app: Received key event: Esc
-08:28:17 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:18 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-08:28:19 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:19 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:19 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:19 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:20 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:20 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:20 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:20 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:21 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:28:21 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:22 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-08:28:22 [INFO] Staging item: Cargo.lock
-08:28:22 [INFO] Refreshing app state...
-08:28:22 [INFO] Refresh complete. Found 4 status items and 14 log entries.
-08:28:23 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-08:28:23 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:24 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:24 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:24 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:24 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:24 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:24 [DEBUG] (1) dotatui::app: Received key event: Char('u')
-08:28:26 [DEBUG] (1) dotatui::app: Received key event: Char('q')
+11:31:50 [INFO] Dotatui started in repository: "/home/sarang/Development/scripts/dotatui"
+11:31:50 [INFO] Refreshing app state...
+11:31:51 [INFO] Refresh complete. Found 1 status items and 15 log entries.
+11:31:53 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:31:54 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:31:54 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:31:54 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+11:31:55 [DEBUG] (1) dotatui::app: Received key event: Right
+11:31:55 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:56 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:56 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:56 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:56 [DEBUG] (1) dotatui::app: Received key event: Up
+11:31:57 [DEBUG] (1) dotatui::app: Received key event: Up
+11:31:57 [DEBUG] (1) dotatui::app: Received key event: Up
+11:31:58 [DEBUG] (1) dotatui::app: Received key event: Up
+11:31:58 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:58 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:58 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:58 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:59 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:59 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:59 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:59 [DEBUG] (1) dotatui::app: Received key event: Down
+11:31:59 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:00 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:00 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:00 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:00 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:00 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:00 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:01 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:01 [DEBUG] (1) dotatui::app: Received key event: Down
+11:32:01 [DEBUG] (1) dotatui::app: Received key event: Up
+11:32:01 [DEBUG] (1) dotatui::app: Received key event: Up
+11:32:01 [DEBUG] (1) dotatui::app: Received key event: Left
+11:32:05 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:32:05 [DEBUG] (1) dotatui::app: Received key event: Esc
+11:32:06 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:32:06 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:32:07 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:32:07 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:32:07 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+11:32:08 [DEBUG] (1) dotatui::app: Received key event: Char('l')
+11:32:08 [DEBUG] (1) dotatui::app: Received key event: Char('l')
+11:40:25 [DEBUG] (1) dotatui::app: Received key event: Char('q')

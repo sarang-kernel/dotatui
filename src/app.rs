@@ -172,9 +172,7 @@ impl App {
     pub fn handle_mouse_event(&mut self, event: MouseEvent) -> AppResult<()> {
         debug!("Received mouse event: {:?}", event);
         if let Mode::Status(_) = self.mode {
-            // This is a simplified calculation and may need adjustment based on final layout.
-            // It assumes the status view starts at y=1 and the files panel is 40% of the width.
-            let terminal_width = 200; // A reasonable assumption, adjust if needed.
+            let terminal_width = 200;
             let files_panel_width = (terminal_width as f32 * 0.4) as u16;
 
             let files_panel_rect = Rect::new(0, 1, files_panel_width, 999);
@@ -265,11 +263,15 @@ impl App {
             StatusMode::FileSelection => {
                 match self.active_panel {
                     ActivePanel::Files => {
-                        if key == self.keys.select_next { self.select_next_status_item(); }
-                        else if key == self.keys.select_prev { self.select_previous_status_item(); }
-                        else if key == self.keys.stage_item { self.stage_selected()?; }
-                        else if key == self.keys.unstage_item { self.unstage_selected()?; }
-                        else if key == self.keys.confirm {
+                        if key == self.keys.select_next {
+                            self.select_next_status_item();
+                        } else if key == self.keys.select_prev {
+                            self.select_previous_status_item();
+                        } else if key == self.keys.stage_item {
+                            self.stage_selected()?;
+                        } else if key == self.keys.unstage_item {
+                            self.unstage_selected()?;
+                        } else if key == self.keys.confirm {
                             if let Some(item) = self.get_selected_status_item() {
                                 self.current_hunks = self.repo.get_diff_hunks(&item)?;
                                 if !self.current_hunks.is_empty() {
@@ -285,13 +287,22 @@ impl App {
                     ActivePanel::Diff => {}
                 }
 
-                if key == self.keys.log_mode { self.mode = Mode::Log; }
-                else if key == self.keys.commit { self.popup = Some(Popup::Commit); }
-                else if key == self.keys.push { self.push_to_remote(); }
+                if key == self.keys.log_mode {
+                    self.mode = Mode::Log;
+                } else if key == self.keys.commit {
+                    self.popup = Some(Popup::Commit);
+                } else if key == self.keys.push {
+                    self.push_to_remote();
+                }
             }
             StatusMode::HunkSelection => {
-                if key == self.keys.select_next { self.select_next_hunk(); }
-                else if key == self.keys.select_prev { self.select_previous_hunk(); }
+                if key == self.keys.select_next {
+                    self.select_next_hunk();
+                } else if key == self.keys.select_prev {
+                    self.select_previous_hunk();
+                } else if key == self.keys.stage_item {
+                    self.stage_selected_hunk()?;
+                }
             }
         }
         Ok(())
@@ -339,6 +350,20 @@ impl App {
             if !item.is_staged {
                 info!("Staging item: {}", item.path);
                 self.repo.stage_item(&item)?;
+                self.refresh()?;
+            }
+        }
+        Ok(())
+    }
+
+    fn stage_selected_hunk(&mut self) -> AppResult<()> {
+        if let Some(hunk_index) = self.hunk_list_state.selected() {
+            if let Some(item) = self.get_selected_status_item() {
+                info!("Staging hunk #{} for file '{}'", hunk_index, item.path);
+                self.repo.stage_hunk(&item, hunk_index)?;
+                self.mode = Mode::Status(StatusMode::FileSelection);
+                self.current_hunks.clear();
+                self.hunk_list_state.select(None);
                 self.refresh()?;
             }
         }
@@ -432,7 +457,8 @@ impl App {
             if let Some(item_type) = self.status_display_list.get(selected) {
                 if matches!(item_type, StatusItemType::Header(_)) {
                     if selected == 0 {
-                        self.status_list_state.select(Some(self.status_display_list.len() - 1));
+                        self.status_list_state
+                            .select(Some(self.status_display_list.len() - 1));
                         self.skip_headers_backward();
                     } else {
                         self.select_previous_status_item();

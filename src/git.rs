@@ -2,7 +2,11 @@
 
 use crate::error::{AppError, AppResult};
 use chrono::{DateTime, Local};
-use git2::{Commit, Diff, DiffOptions, Patch, Repository, Status, StatusOptions};
+// Added std::io::Write and removed unused Delta
+use git2::{
+    ApplyLocation, ApplyOptions, Commit, Diff, DiffOptions, Patch, Repository, Status, StatusOptions,
+};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -149,19 +153,59 @@ impl GitRepo {
         }
     }
 
-    /// Stages an item based on its status. Correctly handles additions, modifications, and deletions.
+    pub fn stage_hunk(&self, item: &StatusItem, hunk_index: usize) -> AppResult<()> {
+        let diff = self.get_diff_for_item(item)?;
+        let patch = Patch::from_diff(&diff, 0)?
+            .ok_or_else(|| AppError::Git(git2::Error::from_str("Could not create patch from diff")))?;
+
+        let mut patch_buffer = Vec::new();
+
+        // Correctly get delta without `if let`
+        let delta = patch.delta();
+        let old_file = delta.old_file();
+        let new_file = delta.new_file();
+
+        // Use writeln! with std::io::Write in scope
+        writeln!(
+            &mut patch_buffer,
+            "--- a/{}",
+            old_file.path().unwrap().display()
+        )?;
+        writeln!(
+            &mut patch_buffer,
+            "+++ b/{}",
+            new_file.path().unwrap().display()
+        )?;
+
+        let (hunk_header, num_lines) = patch.hunk(hunk_index)?;
+        patch_buffer.extend_from_slice(hunk_header.header());
+
+        for i in 0..num_lines {
+            let line = patch.line_in_hunk(hunk_index, i)?;
+            // Correctly cast char to u8
+            patch_buffer.push(line.origin() as u8);
+            patch_buffer.extend_from_slice(line.content());
+        }
+        
+        // Add a newline at the end of the patch for robustness
+        writeln!(&mut patch_buffer)?;
+
+        let new_diff = Diff::from_buffer(&patch_buffer)?;
+
+        self.repo
+            .apply(&new_diff, ApplyLocation::Index, Some(&mut ApplyOptions::new()))?;
+
+        Ok(())
+    }
+
     pub fn stage_item(&self, item: &StatusItem) -> AppResult<()> {
         let mut index = self.repo.index()?;
         let path = Path::new(&item.path);
-
         if item.status.is_wt_deleted() {
-            // Use `remove_path` for deletions.
             index.remove_path(path)?;
         } else {
-            // Use `add_path` for new, modified, or renamed files.
             index.add_path(path)?;
         }
-
         index.write()?;
         Ok(())
     }

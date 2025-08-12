@@ -1,479 +1,109 @@
-18:59:10 [INFO] Dotatui started in repository: "/home/sarang/Development/scripts/dotatui"
-18:59:10 [INFO] Refreshing app state...
-18:59:10 [INFO] Refresh complete. Display list has 7 items.
-18:59:13 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:13 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:13 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:13 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:13 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:14 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-18:59:14 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-18:59:15 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-18:59:15 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-18:59:15 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-18:59:16 [DEBUG] (1) dotatui::app: Received key event: Char('l')
-18:59:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:18 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:18 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 101, row: 23, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 104, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 106, row: 20, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 109, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 112, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 115, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 119, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 122, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 124, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 126, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 128, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 129, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 131, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 131, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 131, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 131, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 131, row: 22, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 131, row: 23, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 130, row: 25, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 130, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 129, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 129, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 128, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 127, row: 29, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 125, row: 30, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 123, row: 31, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 121, row: 31, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 118, row: 31, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 117, row: 32, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 115, row: 32, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 111, row: 32, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 108, row: 32, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 107, row: 32, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 106, row: 31, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 105, row: 31, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 105, row: 30, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 104, row: 30, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 104, row: 29, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 104, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 104, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollDown, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:19 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:20 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:21 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:22 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 28, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:23 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:24 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: ScrollUp, column: 103, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 102, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 101, row: 27, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 100, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 97, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 95, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 93, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 90, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 85, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 82, row: 26, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 79, row: 25, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 77, row: 25, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 74, row: 25, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 71, row: 25, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 67, row: 24, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 65, row: 24, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 61, row: 24, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 57, row: 24, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 54, row: 24, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 52, row: 23, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 46, row: 23, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 43, row: 23, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 40, row: 23, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 38, row: 23, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 35, row: 22, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 34, row: 22, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 32, row: 22, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 31, row: 22, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 30, row: 22, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 30, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 29, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 28, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 27, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 26, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 25, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:25 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 24, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 25, row: 21, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 25, row: 20, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 26, row: 20, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 29, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 32, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 35, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 42, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 46, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 52, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 57, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 62, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 70, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 76, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 80, row: 15, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 83, row: 15, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 87, row: 15, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 89, row: 15, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 92, row: 15, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 93, row: 15, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 94, row: 15, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 93, row: 14, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 92, row: 14, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 92, row: 13, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 91, row: 12, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 91, row: 11, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 90, row: 11, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 90, row: 10, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 90, row: 9, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 89, row: 9, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 89, row: 8, modifiers: KeyModifiers(0x0) }
-18:59:26 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 89, row: 7, modifiers: KeyModifiers(0x0) }
-18:59:27 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 89, row: 8, modifiers: KeyModifiers(0x0) }
-18:59:27 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 8, modifiers: KeyModifiers(0x0) }
-18:59:27 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 9, modifiers: KeyModifiers(0x0) }
-18:59:28 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 10, modifiers: KeyModifiers(0x0) }
-18:59:29 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 11, modifiers: KeyModifiers(0x0) }
-18:59:30 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 12, modifiers: KeyModifiers(0x0) }
-18:59:30 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 13, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 14, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 15, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 88, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 87, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 86, row: 16, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 85, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 83, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 81, row: 17, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 80, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 78, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 77, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 75, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 74, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 73, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 72, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 71, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 70, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 69, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 68, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 67, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:31 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 66, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 65, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 64, row: 18, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 63, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 62, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 61, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 60, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 59, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 58, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 57, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 56, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 54, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 53, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 52, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 51, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 50, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 48, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 47, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 46, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 45, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 44, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 43, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 42, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 41, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 40, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 39, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 37, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 34, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 33, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 31, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 29, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 28, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:32 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 27, row: 19, modifiers: KeyModifiers(0x0) }
-18:59:34 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-18:59:35 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-18:59:36 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:38 [DEBUG] (1) dotatui::app: Received key event: Char('h')
-18:59:39 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-18:59:39 [INFO] Staging item: dotatui.log
-18:59:39 [INFO] Refreshing app state...
-18:59:39 [INFO] Refresh complete. Display list has 9 items.
-18:59:39 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:41 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-18:59:41 [INFO] Staging item: dotatui.log
-18:59:41 [INFO] Refreshing app state...
-18:59:41 [INFO] Refresh complete. Display list has 9 items.
-18:59:42 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:45 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-18:59:45 [INFO] Staging item: src/app.rs
-18:59:45 [INFO] Refreshing app state...
-18:59:45 [INFO] Refresh complete. Display list has 9 items.
-18:59:46 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:46 [DEBUG] (1) dotatui::app: Received key event: Char('k')
-18:59:47 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-18:59:47 [INFO] Staging item: dotatui.log
-18:59:47 [INFO] Refreshing app state...
-18:59:47 [INFO] Refresh complete. Display list has 9 items.
-18:59:48 [DEBUG] (1) dotatui::app: Received key event: Char('j')
-18:59:49 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-18:59:49 [INFO] Staging item: src/config.rs
-18:59:49 [INFO] Refreshing app state...
-18:59:49 [INFO] Refresh complete. Display list has 9 items.
-18:59:50 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
-18:59:50 [INFO] Staging item: dotatui.log
+20:25:08 [INFO] Dotatui started in repository: "/home/sarang/Development/scripts/dotatui"
+20:25:08 [INFO] Refreshing app state...
+20:25:08 [INFO] Refresh complete. Display list has 5 items.
+20:25:13 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:13 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:14 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:14 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:15 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:15 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:15 [DEBUG] (1) dotatui::app: Received key event: Char('l')
+20:25:16 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:16 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:16 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:17 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:18 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:18 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:18 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:18 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:19 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:19 [DEBUG] (1) dotatui::app: Received key event: Char('h')
+20:25:19 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:20 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:20 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:20 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:21 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:23 [DEBUG] (1) dotatui::app: Received key event: Enter
+20:25:23 [INFO] Entering HunkSelection mode for file: src/app.rs
+20:25:23 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:23 [DEBUG] (1) dotatui::app: Selected hunk index: 1
+20:25:24 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:24 [DEBUG] (1) dotatui::app: Selected hunk index: 2
+20:25:24 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:24 [DEBUG] (1) dotatui::app: Selected hunk index: 1
+20:25:25 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:25 [DEBUG] (1) dotatui::app: Selected hunk index: 2
+20:25:25 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:25 [DEBUG] (1) dotatui::app: Selected hunk index: 3
+20:25:26 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:26 [DEBUG] (1) dotatui::app: Selected hunk index: 2
+20:25:26 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:26 [DEBUG] (1) dotatui::app: Selected hunk index: 1
+20:25:26 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:26 [DEBUG] (1) dotatui::app: Selected hunk index: 0
+20:25:28 [DEBUG] (1) dotatui::app: Received key event: Char('h')
+20:25:30 [DEBUG] (1) dotatui::app: Received key event: Enter
+20:25:32 [DEBUG] (1) dotatui::app: Received key event: Esc
+20:25:33 [DEBUG] (1) dotatui::app: Received key event: Char('h')
+20:25:33 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:33 [DEBUG] (1) dotatui::app: Selected hunk index: 1
+20:25:34 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:34 [DEBUG] (1) dotatui::app: Selected hunk index: 0
+20:25:34 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:34 [DEBUG] (1) dotatui::app: Selected hunk index: 4
+20:25:35 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:35 [DEBUG] (1) dotatui::app: Selected hunk index: 0
+20:25:35 [DEBUG] (1) dotatui::app: Received key event: Char('q')
+20:25:35 [INFO] Quitting HunkSelection mode, returning to FileSelection
+20:25:36 [DEBUG] (1) dotatui::app: Received key event: Char('h')
+20:25:36 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:37 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:37 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:38 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:39 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:39 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:39 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:39 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:40 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:40 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:41 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:41 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:41 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
+20:25:41 [INFO] Staging item: src/app.rs
+20:25:41 [INFO] Refreshing app state...
+20:25:41 [INFO] Refresh complete. Display list has 6 items.
+20:25:42 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:42 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
+20:25:42 [INFO] Staging item: src/git.rs
+20:25:42 [INFO] Refreshing app state...
+20:25:42 [INFO] Refresh complete. Display list has 6 items.
+20:25:43 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:43 [DEBUG] (1) dotatui::app: Received key event: Char(' ')
+20:25:43 [INFO] Staging item: src/ui.rs
+20:25:43 [INFO] Refreshing app state...
+20:25:43 [INFO] Refresh complete. Display list has 6 items.
+20:25:45 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:45 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:45 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:45 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:45 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:46 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:46 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:47 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:47 [DEBUG] (1) dotatui::app: Received key event: Char('d')
+20:25:49 [DEBUG] (1) dotatui::app: Received key event: Char('l')
+20:25:50 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:50 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:51 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:51 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:51 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:51 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:51 [DEBUG] (1) dotatui::app: Received key event: Char('j')
+20:25:52 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:52 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:25:52 [DEBUG] (1) dotatui::app: Received key event: Char('k')
+20:26:06 [DEBUG] (1) dotatui::app: Received mouse event: MouseEvent { kind: Moved, column: 63, row: 40, modifiers: KeyModifiers(0x0) }
+20:26:09 [DEBUG] (1) dotatui::app: Received key event: Char('q')

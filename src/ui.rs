@@ -51,74 +51,75 @@ fn render_status_view(frame: &mut Frame, app: &mut App, area: Rect, sub_mode: St
         .constraints([Constraint::Percentage(40), Constraint::Percentage(60)].as_ref())
         .split(area);
 
-    let files_border_style = if app.active_panel == ActivePanel::Files {
-        Style::default().fg(Color::Cyan)
-    } else {
-        Style::default()
-    };
-    let diff_border_style = if app.active_panel == ActivePanel::Diff {
-        Style::default().fg(Color::Cyan)
-    } else {
-        Style::default()
-    };
+    let files_border_style = if app.active_panel == ActivePanel::Files { Style::default().fg(Color::Cyan) } else { Style::default() };
+    let diff_border_style = if app.active_panel == ActivePanel::Diff { Style::default().fg(Color::Cyan) } else { Style::default() };
 
-    let list_items: Vec<ListItem> = app
-        .status_display_list
-        .iter()
-        .map(|item_type| match item_type {
-            StatusItemType::Header(header) => {
-                ListItem::new(header.clone()).style(Style::default().add_modifier(Modifier::BOLD))
-            }
-            StatusItemType::Item(item) => status_to_list_item(item),
-        })
-        .collect();
+    let list_items: Vec<ListItem> = app.status_display_list.iter().map(|item_type| match item_type {
+        StatusItemType::Header(header) => ListItem::new(header.clone()).style(Style::default().add_modifier(Modifier::BOLD)),
+        StatusItemType::Item(item) => status_to_list_item(item),
+    }).collect();
 
     let file_list = List::new(list_items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title("Files ('h' to focus)")
-                .border_style(files_border_style),
-        )
+        .block(Block::default().borders(Borders::ALL).title("Files ('h' to focus)").border_style(files_border_style))
         .highlight_style(Style::default().bg(Color::DarkGray))
         .highlight_symbol(">> ");
     frame.render_stateful_widget(file_list, chunks[0], &mut app.status_list_state);
 
     let diff_title = match sub_mode {
         StatusMode::FileSelection => "Diff ('l' to focus, 'enter' to select hunks)",
-        StatusMode::HunkSelection => "Diff ('l' to focus, 'q' to exit hunk-mode)",
+        StatusMode::HunkSelection => "Diff ('j'/'k' to select, 'space' to stage, 'q' to exit)",
     };
 
-    let diff_text = if let Some(item) = app.get_selected_status_item() {
-        app.repo
-            .get_diff_text(&item)
-            .unwrap_or_else(|_| "Error loading diff".to_string())
-    } else {
-        "Select a file to see the diff.".to_string()
-    };
+    match sub_mode {
+        StatusMode::FileSelection => {
+            let diff_text = if let Some(item) = app.get_selected_status_item() {
+                app.repo.get_diff_text(&item).unwrap_or_else(|_| "Error loading diff".to_string())
+            } else { "Select a file to see the diff.".to_string() };
+            let diff_lines: Vec<Line> = diff_text.lines().map(|line| {
+                let (style, line_content) = if line.starts_with('+') { (Style::default().fg(Color::Green), line) }
+                else if line.starts_with('-') { (Style::default().fg(Color::Red), line) }
+                else if line.starts_with("@@") { (Style::default().fg(Color::Cyan), line) }
+                else { (Style::default(), line) };
+                Line::styled(line_content.to_string(), style)
+            }).collect();
+            let diff_view = Paragraph::new(diff_lines)
+                .block(Block::default().borders(Borders::ALL).title(diff_title).border_style(diff_border_style));
+            frame.render_widget(diff_view, chunks[1]);
+        }
+        StatusMode::HunkSelection => {
+            let mut hunk_list_items = Vec::new();
+            let selected_hunk = app.hunk_list_state.selected();
 
-    let diff_lines: Vec<Line> = diff_text
-        .lines()
-        .map(|line| {
-            let (style, line_content) = if line.starts_with('+') {
-                (Style::default().fg(Color::Green), line)
-            } else if line.starts_with('-') {
-                (Style::default().fg(Color::Red), line)
-            } else if line.starts_with("@@") {
-                (Style::default().fg(Color::Cyan), line)
-            } else {
-                (Style::default(), line)
-            };
-            Line::styled(line_content.to_string(), style)
-        })
-        .collect();
-    let diff_view = Paragraph::new(diff_lines).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .title(diff_title)
-            .border_style(diff_border_style),
-    );
-    frame.render_widget(diff_view, chunks[1]);
+            for (i, hunk) in app.current_hunks.iter().enumerate() {
+                let is_selected = Some(i) == selected_hunk;
+                let bg_color = if is_selected { Color::DarkGray } else { Color::Reset };
+
+                hunk_list_items.push(ListItem::new(ratatui::text::Line::from(vec![Span::styled(
+                    hunk.header.trim_end(),
+                    Style::default().fg(Color::Cyan).bg(bg_color),
+                )])));
+
+                for line in &hunk.lines {
+                    let (prefix, style) = match line.origin {
+                        '+' => ("+", Style::default().fg(Color::Green).bg(bg_color)),
+                        '-' => ("-", Style::default().fg(Color::Red).bg(bg_color)),
+                        _ => (" ", Style::default().bg(bg_color)),
+                    };
+                    hunk_list_items.push(ListItem::new(ratatui::text::Line::from(vec![
+                        Span::styled(prefix, style),
+                        Span::styled(line.content.trim_end(), style),
+                    ])));
+                }
+            }
+
+            let hunk_list = List::new(hunk_list_items)
+                .block(Block::default().borders(Borders::ALL).title(diff_title).border_style(diff_border_style));
+
+            // We don't need a stateful widget here because we are manually applying the background color.
+            // A stateful list would try to draw its own highlight over ours.
+            frame.render_widget(hunk_list, chunks[1]);
+        }
+    }
 }
 
 fn render_log_view(frame: &mut Frame, app: &mut App, area: Rect) {
@@ -151,7 +152,7 @@ fn render_log_view(frame: &mut Frame, app: &mut App, area: Rect) {
 fn status_to_list_item(item: &StatusItem) -> ListItem {
     let (prefix, color) = status_to_prefix_and_color(item.status);
     let style = Style::default().fg(color);
-    ListItem::new(Line::from(vec![
+    ListItem::new(ratatui::text::Line::from(vec![
         Span::styled(prefix, style.clone().add_modifier(Modifier::BOLD)),
         Span::styled(item.path.clone(), style),
     ]))
@@ -180,63 +181,25 @@ fn render_popup(frame: &mut Frame, popup: &Popup, commit_msg: &str, cursor_pos: 
     let content = match popup {
         Popup::Help => {
             let text = vec![
-                Line::from(vec![
-                    Span::styled("q", Style::default().bold()),
-                    Span::raw(": quit"),
-                ]),
-                Line::from(""),
-                Line::from(vec![
-                    Span::styled("s", Style::default().bold()),
-                    Span::raw(": Status View"),
-                ]),
-                Line::from(vec![
-                    Span::styled("l", Style::default().bold()),
-                    Span::raw(": Log View"),
-                ]),
-                Line::from(""),
-                Line::from(vec![
-                    Span::styled("h/l", Style::default().bold()),
-                    Span::raw(": change active panel"),
-                ]),
-                Line::from(vec![
-                    Span::styled("j/k", Style::default().bold()),
-                    Span::raw(" or "),
-                    Span::styled("↓/↑", Style::default().bold()),
-                    Span::raw(": navigate lists"),
-                ]),
-                Line::from(vec![
-                    Span::styled("enter", Style::default().bold()),
-                    Span::raw(": enter hunk selection mode"),
-                ]),
-                Line::from(vec![
-                    Span::styled("space", Style::default().bold()),
-                    Span::raw(": stage item/hunk"),
-                ]),
-                Line::from(vec![
-                    Span::styled("u", Style::default().bold()),
-                    Span::raw(": unstage item"),
-                ]),
-                Line::from(vec![
-                    Span::styled("c", Style::default().bold()),
-                    Span::raw(": commit"),
-                ]),
-                Line::from(vec![
-                    Span::styled("Shift+P", Style::default().bold()),
-                    Span::raw(": push to origin"),
-                ]),
-                Line::from(""),
-                Line::from(vec![
-                    Span::styled("esc", Style::default().bold()),
-                    Span::raw(": close popups"),
-                ]),
+                ratatui::text::Line::from(vec![Span::styled("q", Style::default().bold()), Span::raw(": quit")]),
+                ratatui::text::Line::from(""),
+                ratatui::text::Line::from(vec![Span::styled("s", Style::default().bold()), Span::raw(": Status View")]),
+                ratatui::text::Line::from(vec![Span::styled("l", Style::default().bold()), Span::raw(": Log View")]),
+                ratatui::text::Line::from(""),
+                ratatui::text::Line::from(vec![Span::styled("h/l", Style::default().bold()), Span::raw(": change active panel")]),
+                ratatui::text::Line::from(vec![Span::styled("j/k", Style::default().bold()), Span::raw(" or "), Span::styled("↓/↑", Style::default().bold()), Span::raw(": navigate lists")]),
+                ratatui::text::Line::from(vec![Span::styled("enter", Style::default().bold()), Span::raw(": enter hunk selection mode")]),
+                ratatui::text::Line::from(vec![Span::styled("space", Style::default().bold()), Span::raw(": stage item/hunk")]),
+                ratatui::text::Line::from(vec![Span::styled("u", Style::default().bold()), Span::raw(": unstage item")]),
+                ratatui::text::Line::from(vec![Span::styled("c", Style::default().bold()), Span::raw(": commit")]),
+                ratatui::text::Line::from(vec![Span::styled("Shift+P", Style::default().bold()), Span::raw(": push to origin")]),
+                ratatui::text::Line::from(""),
+                ratatui::text::Line::from(vec![Span::styled("esc", Style::default().bold()), Span::raw(": close popups")]),
             ];
-            Paragraph::new(text)
-                .block(block.title(" Help (?) "))
-                .alignment(Alignment::Left)
+            Paragraph::new(text).block(block.title(" Help (?) ")).alignment(Alignment::Left)
         }
         Popup::Commit => {
-            let p = Paragraph::new(commit_msg)
-                .block(block.title(" Commit Message (Enter to confirm, Esc to cancel) "));
+            let p = Paragraph::new(commit_msg).block(block.title(" Commit Message (Enter to confirm, Esc to cancel) "));
             frame.set_cursor(popup_area.x + cursor_pos as u16 + 1, popup_area.y + 1);
             p
         }

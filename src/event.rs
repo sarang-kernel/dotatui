@@ -10,11 +10,11 @@ pub enum AppEvent {
     PushFinished(AppResult<()>),
 }
 
-/// Terminal events (user input)
+/// Terminal events (user input).
 #[derive(Debug)]
 pub enum InputEvent {
     Key(KeyEvent),
-    Mouse(MouseEvent),
+    Mouse(MouseEvent), // Add Mouse variant
     Tick,
 }
 
@@ -40,14 +40,13 @@ impl EventHandler {
                                     break;
                                 }
                             }
-
                             // Capture mouse events
                             Ok(CrosstermEvent::Mouse(mouse)) => {
                                 if input_tx.send(InputEvent::Mouse(mouse)).is_err() {
                                     break;
                                 }
                             }
-                            _ => {} //Other events like Resize are ignored for now
+                            _ => {} // Other events like Resize are ignored for now
                         }
                     }
                     if input_tx.send(InputEvent::Tick).is_err() {
@@ -56,6 +55,7 @@ impl EventHandler {
                 }
             })
         };
+
         Self {
             input_rx,
             app_rx,
@@ -64,7 +64,7 @@ impl EventHandler {
         }
     }
 
-    pub async fn next(&mut self) -> AppResult<Either<InputEvent,AppEvent>> {
+    pub async fn next(&mut self) -> AppResult<Either<InputEvent, AppEvent>> {
         tokio::select! {
             Some(event) = self.input_rx.recv() => Ok(Either::Left(event)),
             Some(event) = self.app_rx.recv() => Ok(Either::Right(event)),

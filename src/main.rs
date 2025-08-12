@@ -2,7 +2,7 @@
 
 use dotatui::{
     app::{App, AppReturn},
-    error::{AppError,AppResult},
+    error::{AppError, AppResult},
     event::{AppEvent, Either, EventHandler, InputEvent},
     git::GitRepo,
     tui::Tui,
@@ -44,14 +44,16 @@ async fn main() -> AppResult<()> {
             dotatui::ui::render(frame, &mut app);
         })?;
 
+        // Update the main event loop match
         match event_handler.next().await? {
             Either::Left(InputEvent::Key(key_event)) => {
                 if app.handle_key_event(key_event)? == AppReturn::Exit {
                     break;
                 }
             }
+            // Add a new arm for Mouse events
             Either::Left(InputEvent::Mouse(mouse_event)) => {
-                app.handle_app_event(mouse_event)?;
+                app.handle_mouse_event(mouse_event)?;
             }
             Either::Right(AppEvent::PushFinished(result)) => {
                 app.handle_app_event(AppEvent::PushFinished(result))?;
@@ -60,7 +62,6 @@ async fn main() -> AppResult<()> {
         }
     }
 
-    // Restore the terminal
     tui.exit()?;
     Ok(())
 }

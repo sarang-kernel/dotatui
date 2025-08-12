@@ -1,6 +1,6 @@
 //! src/ui.rs
 
-use crate::app::{App, Mode, Popup, StatusMode};
+use crate::app::{ActivePanel, App, Mode, Popup, StatusItemType, StatusMode};
 use crate::git::StatusItem;
 use git2::Status;
 use ratatui::{
@@ -51,35 +51,47 @@ fn render_status_view(frame: &mut Frame, app: &mut App, area: Rect, sub_mode: St
         .constraints([Constraint::Percentage(40), Constraint::Percentage(60)].as_ref())
         .split(area);
 
-    let (staged_items, unstaged_items): (Vec<_>, Vec<_>) =
-        app.status_items.iter().partition(|item| item.is_staged);
-    let mut all_list_items = Vec::new();
-    if !staged_items.is_empty() {
-        all_list_items
-            .push(ListItem::new("Staged changes:").style(Style::default().add_modifier(Modifier::BOLD)));
-        all_list_items.extend(staged_items.iter().map(|item| status_to_list_item(item)));
-    }
-    if !unstaged_items.is_empty() {
-        all_list_items.push(
-            ListItem::new("Unstaged changes:").style(Style::default().add_modifier(Modifier::BOLD)),
-        );
-        all_list_items.extend(unstaged_items.iter().map(|item| status_to_list_item(item)));
-    }
-    let file_list = List::new(all_list_items)
-        .block(Block::default().borders(Borders::ALL).title("Files"))
+    let files_border_style = if app.active_panel == ActivePanel::Files {
+        Style::default().fg(Color::Cyan)
+    } else {
+        Style::default()
+    };
+    let diff_border_style = if app.active_panel == ActivePanel::Diff {
+        Style::default().fg(Color::Cyan)
+    } else {
+        Style::default()
+    };
+
+    let list_items: Vec<ListItem> = app
+        .status_display_list
+        .iter()
+        .map(|item_type| match item_type {
+            StatusItemType::Header(header) => {
+                ListItem::new(header.clone()).style(Style::default().add_modifier(Modifier::BOLD))
+            }
+            StatusItemType::Item(item) => status_to_list_item(item),
+        })
+        .collect();
+
+    let file_list = List::new(list_items)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Files ('h' to focus)")
+                .border_style(files_border_style),
+        )
         .highlight_style(Style::default().bg(Color::DarkGray))
         .highlight_symbol(">> ");
     frame.render_stateful_widget(file_list, chunks[0], &mut app.status_list_state);
 
     let diff_title = match sub_mode {
-        StatusMode::FileSelection => "Diff (Press 'enter' to select hunks)",
-        StatusMode::HunkSelection => "Diff (Press 'q' to exit hunk-mode)",
+        StatusMode::FileSelection => "Diff ('l' to focus, 'enter' to select hunks)",
+        StatusMode::HunkSelection => "Diff ('l' to focus, 'q' to exit hunk-mode)",
     };
 
-    // Use the correct function name: get_diff_text
     let diff_text = if let Some(item) = app.get_selected_status_item() {
         app.repo
-            .get_diff_text(item)
+            .get_diff_text(&item)
             .unwrap_or_else(|_| "Error loading diff".to_string())
     } else {
         "Select a file to see the diff.".to_string()
@@ -100,7 +112,12 @@ fn render_status_view(frame: &mut Frame, app: &mut App, area: Rect, sub_mode: St
             Line::styled(line_content.to_string(), style)
         })
         .collect();
-    let diff_view = Paragraph::new(diff_lines).block(Block::default().borders(Borders::ALL).title(diff_title));
+    let diff_view = Paragraph::new(diff_lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(diff_title)
+            .border_style(diff_border_style),
+    );
     frame.render_widget(diff_view, chunks[1]);
 }
 
@@ -177,6 +194,10 @@ fn render_popup(frame: &mut Frame, popup: &Popup, commit_msg: &str, cursor_pos: 
                     Span::raw(": Log View"),
                 ]),
                 Line::from(""),
+                Line::from(vec![
+                    Span::styled("h/l", Style::default().bold()),
+                    Span::raw(": change active panel"),
+                ]),
                 Line::from(vec![
                     Span::styled("j/k", Style::default().bold()),
                     Span::raw(" or "),
